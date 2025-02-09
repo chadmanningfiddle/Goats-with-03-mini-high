@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Fiddle Shack</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <h1>My Fiddle Shack</h1>
+    <% if (user) { %>
+      <p>Welcome, <%= user.username %>! (<a href="/logout">Logout</a>)</p>
+    <% } else { %>
+      <nav>
+        <a href="/login">Login</a>
+        <a href="/signup">Sign Up</a>
+      </nav>
+    <% } %>
+  </header>
+  <main>
+    <div class="home-buttons">
+      <a href="/private-lessons" class="home-button">Private Lessons</a>
+      <!-- Add more navigation buttons as needed -->
+      <a href="/fiddlers-log" class="home-button">Fiddler's Log</a>
+    </div>
+  </main>
+</body>
+</html>
