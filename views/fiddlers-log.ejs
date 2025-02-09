@@ -2,22 +2,114 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Fiddler's Log</title>
   <link rel="stylesheet" href="/style.css">
+  <style>
+    /* Fiddler's Log Styles */
+    .lesson-item {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin: 10px auto;
+      border-radius: 5px;
+      background-color: #fff;
+      max-width: 600px;
+    }
+    .lesson-info {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .notes-box {
+      width: 100%;
+      height: 80px;
+      border: 1px solid #8B4513;
+      border-radius: 5px;
+      padding: 5px;
+      resize: vertical;
+      font-size: 14px;
+    }
+    .save-button {
+      background-color: #8B4513;
+      color: #fff;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      margin-top: 5px;
+    }
+    .save-button:hover {
+      background-color: #A0522D;
+    }
+  </style>
 </head>
 <body>
   <header>
     <h1>Fiddler's Log</h1>
     <nav>
       <a href="/">Home</a>
-      <% if (user) { %>
-        <a href="/logout">Logout</a>
-      <% } %>
+      <a href="/logout">Logout</a>
     </nav>
   </header>
   <main>
-    <p>This page is under construction. Check back soon for more updates!</p>
+    <section id="lessons-section">
+      <h2>Your Lessons (Past &amp; Future)</h2>
+      <!-- Lessons will be populated here -->
+    </section>
   </main>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // For this demo, we assume lessons have been stored in localStorage under "bookings"
+      // In a real app, you'd fetch this data from your server/database.
+      let lessons = JSON.parse(localStorage.getItem('bookings')) || [];
+      
+      // Sort lessons by date (assuming lesson.date is stored as a valid date string)
+      lessons.sort((a, b) => new Date(a.date) - new Date(b.date));
+      
+      const lessonsSection = document.getElementById('lessons-section');
+      
+      // Loop through lessons and create a display container for each
+      lessons.forEach((lesson, index) => {
+        // Create a unique id for the lesson's notes. Here we use the index.
+        const lessonId = 'lesson-' + index;
+        const lessonDiv = document.createElement('div');
+        lessonDiv.classList.add('lesson-item');
+        
+        // Format the lesson date
+        const lessonDate = new Date(lesson.date);
+        // Build the lesson info text. You can adjust formatting as needed.
+        let infoText = lessonDate.toDateString() + " @ " + lesson.time;
+        if (lesson.recurring) {
+          infoText += " (" + lesson.frequency + ")";
+        }
+        // Create the inner HTML of the lesson item.
+        lessonDiv.innerHTML = `
+          <div class="lesson-info">${infoText} - $${lesson.price.toFixed(2)} per lesson</div>
+          <textarea id="${lessonId}-notes" class="notes-box" placeholder="Enter notes for this lesson..."></textarea>
+          <br>
+          <button class="save-button" data-lessonid="${lessonId}">Save Notes</button>
+        `;
+        
+        lessonsSection.appendChild(lessonDiv);
+        
+        // Populate the textarea if a saved note exists.
+        const storedNote = localStorage.getItem(lessonId + '-note');
+        if (storedNote) {
+          document.getElementById(lessonId + '-notes').value = storedNote;
+        }
+      });
+      
+      // Add event listeners to the Save buttons.
+      const saveButtons = document.querySelectorAll('.save-button');
+      saveButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const lessonId = this.getAttribute('data-lessonid');
+          const textarea = document.getElementById(lessonId + '-notes');
+          const note = textarea.value;
+          localStorage.setItem(lessonId + '-note', note);
+          alert('Notes saved for this lesson.');
+        });
+      });
+    });
+  </script>
 </body>
 </html>
