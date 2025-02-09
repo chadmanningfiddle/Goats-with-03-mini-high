@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Private Lessons - Calendar & Booking</title>
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    /* Modal Styles */
+    .modal {
+      display: none; /* Hidden by default */
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+    }
+    .modal-content {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 90%;
+      max-width: 500px;
+      border-radius: 10px;
+    }
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .close:hover,
+    .close:focus {
+      color: black;
+    }
+    /* Calendar Styles */
+    .calendar {
+      max-width: 600px;
+      margin: 0 auto 30px auto;
+      border-collapse: collapse;
+      width: 100%;
+    }
+    .calendar th, .calendar td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+    .calendar th {
+      background-color: #e0dcd4;
+    }
+    .calendar td {
+      cursor: pointer;
+    }
+    .calendar td:hover {
+      background-color: #f0e7df;
+    }
+    .selected-day {
+      background-color: #A0522D;
+      color: #fff;
+    }
+    /* Slots Styles */
+    .slots {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      border: 2px solid #8B4513;
+      border-radius: 10px;
+      background-color: #fff8dc;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .slot {
+      padding: 10px;
+      margin: 5px 0;
+      border: 1px solid #8B4513;
+      border-radius: 5px;
+      cursor: pointer;
+      background-color: #fff;
+    }
+    .slot:hover {
+      background-color: #f0e7df;
+    }
+    /* Cart Section Styles */
+    .cart {
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 20px;
+      border: 2px solid #8B4513;
+      border-radius: 10px;
+      background-color: #fff8dc;
+    }
+    .booking-item {
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #ccc;
+    }
+    .booking-item:last-child {
+      border-bottom: none;
+    }
+    .booking-item > span {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .booking-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+    .booking-controls label {
+      font-size: 14px;
+    }
+    .booking-controls select,
+    .booking-controls input[type="number"] {
+      font-size: 14px;
+      padding: 2px 4px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Private Lessons Calendar</h1>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/logout">Logout</a>
+    </nav>
+  </header>
+  <main>
+    <!-- Calendar Section -->
+    <section class="calendar-section">
+      <h2>Select a Day</h2>
+      <div id="calendar-container"></div>
+    </section>
+
+    <!-- Slots Section -->
+    <section class="slots-section">
+      <h2>Available Slots on <span id="selected-date">[Select a Day]</span></h2>
+      <div id="slots-container" class="slots">
+        <!-- Available slots will be dynamically inserted here -->
+      </div>
+    </section>
+
+    <!-- Cart Section -->
+    <section class="cart-section">
+      <h2>Your Booked Lessons</h2>
+      <p style="font-size:14px; color:#555;">
+        To reserve a lesson please make payment using Zelle (chadmanning@gmail.com), Venmo (chad-manning-18), Cash or Check outside of the Fiddle Shack. 
+        For each lesson, check the box when paid, enter the amount (if different from $95) and select your payment method.
+      </p>
+      <div id="cart-list" class="cart">
+        <!-- Booked lessons will appear here -->
+      </div>
+      <button id="confirm-bookings">Confirm Lessons & Go to Fiddler's Log</button>
+    </section>
+  </main>
+
+  <!-- Booking Modal -->
+  <div id="booking-modal" class="modal">
+    <div class="modal-content">
+      <span id="close-modal" class="close">&times;</span>
+      <h2>Book Lesson</h2>
+      <p id="modal-date"></p>
+      <p id="modal-slot"></p>
+      <form id="booking-form">
+        <label>
+          <input type="radio" name="bookingType" value="single" checked> Add to Cart
+        </label>
+        <br>
+        <label>
+          <input type="radio" name="bookingType" value="recurring"> Schedule as Recurring
+        </label>
+        <div id="recurring-options" style="display:none; margin-top:10px;">
+          <label>
+            <input type="radio" name="frequency" value="weekly" checked> Weekly
+          </label>
+          <br>
+          <label>
+            <input type="radio" name="frequency" value="everyOtherWeek"> Every Other Week
+          </label>
+        </div>
+        <br>
+        <label>
+          Lesson Price ($95 standard): 
+          <input type="number" name="price" value="95" min="0" step="0.01">
+        </label>
+        <br><br>
+        <button type="submit">Confirm Booking</button>
+        <button type="button" id="cancel-booking">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Global bookings array to hold all lessons added to cart.
+      let bookings = [];
+      
+      // Calendar and slot elements
+      const calendarContainer = document.getElementById('calendar-container');
+      const slotsContainer = document.getElementById('slots-container');
+      const selectedDateSpan = document.getElementById('selected-date');
+      const cartList = document.getElementById('cart-list');
+      const confirmBookingsButton = document.getElementById('confirm-bookings');
+
+      // Modal elements
+      const bookingModal = document.getElementById('booking-modal');
+      const closeModalBtn = document.getElementById('close-modal');
+      const bookingForm = document.getElementById('booking-form');
+      const modalDateP = document.getElementById('modal-date');
+      const modalSlotP = document.getElementById('modal-slot');
+      const recurringOptions = document.getElementById('recurring-options');
+
+      let currentModalDate = null;
+      let currentModalSlot = null;
+
+      const today = new Date();
+      let currentMonth = today.getMonth();
+      let currentYear = today.getFullYear();
+
+      // Generate calendar for the month
+      function generateCalendar(month, year) {
+        let firstDay = (new Date(year, month)).getDay();
+        let daysInMonth = 32 - new Date(year, month, 32).getDate();
+        let tbl = '<table class="calendar">';
+        tbl += '<tr>';
+        const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        daysOfWeek.forEach(day => tbl += '<th>' + day + '</th>');
+        tbl += '</tr>';
+        let date = 1;
+        for (let i = 0; i < 6; i++) {
+          tbl += '<tr>';
+          for (let j = 0; j < 7; j++) {
+            if (i === 0 && j < firstDay) {
+              tbl += '<td></td>';
+            } else if (date > daysInMonth) {
+              tbl += '<td></td>';
+            } else {
+              tbl += `<td data-date="${date}" data-month="${month}" data-year="${year}">${date}</td>`;
+              date++;
+            }
+          }
+          tbl += '</tr>';
+        }
+        tbl += '</table>';
+        calendarContainer.innerHTML = tbl;
+        addCalendarListeners();
+      }
+
+      function addCalendarListeners() {
+        const cells = document.querySelectorAll('.calendar td[data-date]');
+        cells.forEach(cell => {
+          cell.addEventListener('click', function() {
+            cells.forEach(c => c.classList.remove('selected-day'));
+            this.classList.add('selected-day');
+            let date = this.getAttribute('data-date');
+            let month = parseInt(this.getAttribute('data-month'));
+            let year = this.getAttribute('data-year');
+            let selectedDate = new Date(year, month, date);
+            selectedDateSpan.textContent = selectedDate.toDateString();
+            displaySlots(selectedDate);
+          });
+        });
+      }
+
+      // Display available slots based on day of week
+      function displaySlots(selectedDate) {
+        slotsContainer.innerHTML = '';
+        const dayOfWeek = selectedDate.getDay();
+        let slots = [];
+
+        if (dayOfWeek === 2 || dayOfWeek === 4) {
+          slots = ["8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM"];
+        } else if (dayOfWeek === 3) {
+          slots = ["7:30 AM", "8:30 AM", "9:30 AM", "10:30 AM", "11:30 AM", "12:30 PM", "1:30 PM"];
+        } else if (dayOfWeek === 5) {
+          slots = ["8:30 AM", "9:30 AM", "10:30 AM (25 min)", "12:00 PM", "1:00 PM", "2:00 PM"];
+        } else {
+          slots = ["No lessons available on this day."];
+        }
+
+        if (slots.length === 1 && slots[0].startsWith("No lessons")) {
+          slotsContainer.innerHTML = `<p>${slots[0]}</p>`;
+        } else {
+          slots.forEach(slot => {
+            const btn = document.createElement("button");
+            btn.textContent = slot;
+            btn.classList.add("slot");
+            btn.addEventListener("click", () => {
+              openBookingModal(selectedDate, slot);
+            });
+            slotsContainer.appendChild(btn);
+          });
+        }
+      }
+
+      // Open booking modal
+      function openBookingModal(date, slot) {
+        currentModalDate = date;
+        currentModalSlot = slot;
+        modalDateP.textContent = "Date: " + date.toDateString();
+        modalSlotP.textContent = "Time: " + slot;
+        bookingForm.reset();
+        recurringOptions.style.display = 'none';
+        bookingModal.style.display = 'block';
+      }
+
+      // Close modal
+      function closeModal() {
+        bookingModal.style.display = 'none';
+      }
+
+      // Toggle recurring options
+      if (bookingForm.bookingType) {
+        bookingForm.bookingType.forEach(radio => {
+          radio.addEventListener('change', function() {
+            recurringOptions.style.display = this.value === 'recurring' ? 'block' : 'none';
+          });
+        });
+      }
+
+      // Handle booking form submission
+      bookingForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(bookingForm);
+        const bookingType = formData.get('bookingType');
+        const price = parseFloat(formData.get('price')) || 95;
+        let recurring = false;
+        let frequency = null;
+        if (bookingType === 'recurring') {
+          recurring = true;
+          frequency = formData.get('frequency');
+        }
+        const booking = {
+          date: currentModalDate,
+          time: currentModalSlot,
+          recurring,
+          frequency,
+          price,
+          paid: false,
+          amountPaid: 0,
+          paymentMethod: "" // to be selected later
+        };
+        bookings.push(booking);
+        updateCart();
+        closeModal();
+      });
+
+      document.getElementById('cancel-booking').addEventListener('click', closeModal);
+      closeModalBtn.addEventListener('click', closeModal);
+
+      // Update the cart display with all booked lessons
+      function updateCart() {
+        cartList.innerHTML = '';
+        if (bookings.length === 0) {
+          cartList.innerHTML = "<p>No lessons booked yet.</p>";
+          return;
+        }
+        bookings.forEach((booking, index) => {
+          const div = document.createElement("div");
+          div.classList.add("booking-item");
+          div.innerHTML = `<span>${booking.date.toDateString()} @ ${booking.time}${booking.recurring ? ' (' + booking.frequency + ')' : ''} - $${booking.price.toFixed(2)}</span>`;
+          
+          const controlsDiv = document.createElement("div");
+          controlsDiv.classList.add("booking-controls");
+          
+          // Create checkbox for marking as paid
+          const paidCheckbox = document.createElement("input");
+          paidCheckbox.type = "checkbox";
+          paidCheckbox.id = "paid-" + index;
+          paidCheckbox.addEventListener('change', function() {
+            booking.paid = this.checked;
+            // Enable or disable the payment method select based on the checkbox state
+            paymentSelect.disabled = !this.checked;
+          });
+          
+          // Input for amount paid
+          const amountInput = document.createElement("input");
+          amountInput.type = "number";
+          amountInput.value = booking.price;
+          amountInput.min = "0";
+          amountInput.step = "0.01";
+          amountInput.style.width = "80px";
+          amountInput.addEventListener('change', function() {
+            booking.amountPaid = parseFloat(this.value);
+          });
+          
+          // Create a select element for Payment Method
+          const paymentSelect = document.createElement("select");
+          paymentSelect.disabled = true;  // Initially disabled until checkbox is checked
+          const defaultOption = document.createElement("option");
+          defaultOption.value = "";
+          defaultOption.textContent = "Select Payment Method";
+          defaultOption.disabled = true;
+          defaultOption.selected = true;
+          paymentSelect.appendChild(defaultOption);
+          
+          ["Zelle", "Venmo", "Cash", "Check"].forEach(method => {
+            const option = document.createElement("option");
+            option.value = method;
+            option.textContent = method;
+            paymentSelect.appendChild(option);
+          });
+          paymentSelect.addEventListener('change', function() {
+            booking.paymentMethod = this.value;
+          });
+          
+          // Assemble the controls
+          const paidLabel = document.createElement("label");
+          paidLabel.textContent = " Paid? ";
+          paidLabel.appendChild(paidCheckbox);
+          controlsDiv.appendChild(paidLabel);
+          
+          const amountLabel = document.createElement("label");
+          amountLabel.textContent = " Amount Paid: ";
+          amountLabel.appendChild(amountInput);
+          controlsDiv.appendChild(amountLabel);
+          
+          const paymentLabel = document.createElement("label");
+          paymentLabel.textContent = " Payment Method: ";
+          paymentLabel.appendChild(paymentSelect);
+          controlsDiv.appendChild(paymentLabel);
+          
+          div.appendChild(controlsDiv);
+          cartList.appendChild(div);
+        });
+      }
+
+      // Confirm Lessons button click handler
+      confirmBookingsButton.addEventListener("click", function() {
+        // Here you would normally validate the cart and send the data to the server.
+        window.location.href = "/fiddlers-log";
+      });
+
+      // Initialize the calendar for the current month
+      generateCalendar(currentMonth, currentYear);
+    });
+  </script>
+</body>
+</html>
