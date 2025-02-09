@@ -9,22 +9,15 @@
 <body>
   <header>
     <h1>My Fiddle Shack</h1>
-    <% if (user) { %>
-      <p>Welcome, <%= user.username %>! (<a href="/logout">Logout</a>)</p>
-    <% } else { %>
-      <nav>
-        <a href="/login">Login</a>
-        <a href="/signup">Sign Up</a>
-      </nav>
-    <% } %>
   </header>
   <main>
     <div class="home-buttons">
-      <% if (user) { %>
-        <a href="/private-lessons" class="home-button">Private Lessons</a>
-        <a href="/fiddlers-log" class="home-button">Fiddler's Log</a>
-      <% } else { %>
-        <p>Please log in to access more features.</p>
+      <a href="/private-lessons" class="home-button">Private Lessons</a>
+      <a href="/monday-sessions-chill" class="home-button">Monday Sessions: Chill</a>
+      <a href="/monday-sessions-cruising" class="home-button">Monday Sessions: Cruising</a>
+      <a href="/fiddlers-log" class="home-button">Fiddler's Log</a>
+      <% if (!user) { %>
+        <a href="/login" class="home-button">Sign In</a>
       <% } %>
     </div>
   </main>
