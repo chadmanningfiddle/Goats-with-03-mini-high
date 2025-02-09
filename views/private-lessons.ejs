@@ -73,6 +73,7 @@
       background-color: #fff8dc;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
+    /* Force slot buttons to be visible */
     .slot {
       padding: 10px;
       margin: 5px 0;
@@ -80,6 +81,8 @@
       border-radius: 5px;
       cursor: pointer;
       background-color: #fff;
+      display: inline-block;
+      opacity: 1 !important;
     }
     .slot:hover {
       background-color: #f0e7df;
@@ -315,7 +318,7 @@
         bookingModal.style.display = 'none';
       }
 
-      // Toggle recurring options
+      // Toggle recurring options in the modal
       if (bookingForm.bookingType) {
         bookingForm.bookingType.forEach(radio => {
           radio.addEventListener('change', function() {
@@ -324,7 +327,7 @@
         });
       }
 
-      // Handle booking form submission
+      // Handle booking form submission from the modal
       bookingForm.addEventListener('submit', function(e) {
         e.preventDefault();
         const formData = new FormData(bookingForm);
@@ -344,7 +347,7 @@
           price,
           paid: false,
           amountPaid: 0,
-          paymentMethod: "" // to be selected later
+          paymentMethod: ""
         };
         bookings.push(booking);
         updateCart();
@@ -354,7 +357,7 @@
       document.getElementById('cancel-booking').addEventListener('click', closeModal);
       closeModalBtn.addEventListener('click', closeModal);
 
-      // Update the cart display with all booked lessons
+      // Update the cart display with booked lessons and payment inputs
       function updateCart() {
         cartList.innerHTML = '';
         if (bookings.length === 0) {
@@ -369,14 +372,12 @@
           const controlsDiv = document.createElement("div");
           controlsDiv.classList.add("booking-controls");
           
-          // Create checkbox for marking as paid
+          // Checkbox to mark as paid
           const paidCheckbox = document.createElement("input");
           paidCheckbox.type = "checkbox";
           paidCheckbox.id = "paid-" + index;
           paidCheckbox.addEventListener('change', function() {
             booking.paid = this.checked;
-            // Enable or disable the payment method select based on the checkbox state
-            paymentSelect.disabled = !this.checked;
           });
           
           // Input for amount paid
@@ -390,16 +391,14 @@
             booking.amountPaid = parseFloat(this.value);
           });
           
-          // Create a select element for Payment Method
+          // Select element for Payment Method (always active)
           const paymentSelect = document.createElement("select");
-          paymentSelect.disabled = true;  // Initially disabled until checkbox is checked
           const defaultOption = document.createElement("option");
           defaultOption.value = "";
           defaultOption.textContent = "Select Payment Method";
           defaultOption.disabled = true;
           defaultOption.selected = true;
           paymentSelect.appendChild(defaultOption);
-          
           ["Zelle", "Venmo", "Cash", "Check"].forEach(method => {
             const option = document.createElement("option");
             option.value = method;
@@ -431,13 +430,12 @@
         });
       }
 
-      // Confirm Lessons button click handler
+      // Confirm Lessons button: redirect to Fiddler's Log page
       confirmBookingsButton.addEventListener("click", function() {
-        // Here you would normally validate the cart and send the data to the server.
         window.location.href = "/fiddlers-log";
       });
 
-      // Initialize the calendar for the current month
+      // Initialize calendar
       generateCalendar(currentMonth, currentYear);
     });
   </script>
