@@ -3,47 +3,74 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Fiddler's Log</title>
+  <title>Fiddler's Log - Your Lessons</title>
   <link rel="stylesheet" href="/style.css">
   <style>
-    /* Fiddler's Log Styles */
-    .lesson-item {
-      border: 1px solid #ccc;
+    /* New Fiddler's Log Styles */
+    body {
+      background-color: #fefefe;
+      color: #333;
+      font-family: Arial, sans-serif;
+    }
+    header {
+      background-color: #8B4513;
+      color: #fff;
       padding: 10px;
-      margin: 10px auto;
+      text-align: center;
+    }
+    nav a {
+      color: #fff;
+      margin: 0 10px;
+      text-decoration: none;
+    }
+    main {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 10px;
+    }
+    h2 {
+      color: #8B4513;
+    }
+    .lesson {
+      border: 1px solid #ddd;
       border-radius: 5px;
+      padding: 15px;
+      margin-bottom: 15px;
       background-color: #fff;
-      max-width: 600px;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.1);
     }
-    .lesson-info {
-      font-weight: bold;
-      margin-bottom: 5px;
+    .lesson h3 {
+      margin: 0 0 10px 0;
+      color: #8B4513;
     }
-    .notes-box {
+    .lesson p {
+      margin: 5px 0;
+    }
+    .notes-area {
       width: 100%;
       height: 80px;
-      border: 1px solid #8B4513;
-      border-radius: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
       padding: 5px;
-      resize: vertical;
       font-size: 14px;
+      resize: vertical;
     }
-    .save-button {
+    .save-note {
       background-color: #8B4513;
       color: #fff;
       border: none;
-      padding: 5px 10px;
-      border-radius: 3px;
+      padding: 8px 12px;
+      border-radius: 4px;
       cursor: pointer;
       margin-top: 5px;
     }
-    .save-button:hover {
+    .save-note:hover {
       background-color: #A0522D;
     }
-    .empty-message {
+    .empty {
       text-align: center;
       font-style: italic;
-      color: #555;
+      color: #777;
       margin-top: 30px;
     }
   </style>
@@ -57,19 +84,18 @@
     </nav>
   </header>
   <main>
-    <section id="lessons-section">
-      <h2>Your Lessons (Past &amp; Future)</h2>
-      <!-- Lessons will be populated here -->
-    </section>
+    <h2>Your Lessons</h2>
+    <div id="lessons-container">
+      <!-- Lessons will be inserted here -->
+    </div>
   </main>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Attempt to load booked lessons from localStorage
+      // Retrieve lessons from localStorage; if none exist, use sample data.
       let lessons = JSON.parse(localStorage.getItem('bookings')) || [];
       
-      // If there are no lessons, insert some sample data so the page isn’t blank.
+      // If there are no lessons, insert sample lessons so the page isn’t blank.
       if (lessons.length === 0) {
-        // Sample lessons: You can adjust these as needed.
         lessons = [
           {
             date: new Date().toISOString(), // today
@@ -93,61 +119,45 @@
             price: 95
           }
         ];
-        // Optionally save these sample lessons to localStorage so they persist:
         localStorage.setItem('bookings', JSON.stringify(lessons));
       }
       
-      // Sort lessons by date
+      // Sort lessons by date.
       lessons.sort((a, b) => new Date(a.date) - new Date(b.date));
       
-      const lessonsSection = document.getElementById('lessons-section');
-      
-      // Function to generate a unique ID for each lesson based on its index.
-      function getLessonId(index) {
-        return 'lesson-' + index;
-      }
-      
-      // Build the lesson list.
+      const container = document.getElementById('lessons-container');
       if (lessons.length === 0) {
-        lessonsSection.innerHTML += '<p class="empty-message">No lessons booked yet.</p>';
+        container.innerHTML = '<p class="empty">No lessons booked yet.</p>';
       } else {
         lessons.forEach((lesson, index) => {
-          const lessonId = getLessonId(index);
-          const lessonDiv = document.createElement('div');
-          lessonDiv.classList.add('lesson-item');
-          
+          const lessonId = 'lesson-' + index;
           const lessonDate = new Date(lesson.date);
-          let infoText = lessonDate.toDateString() + " @ " + lesson.time;
-          if (lesson.recurring) {
-            infoText += " (" + lesson.frequency + ")";
-          }
-          
-          lessonDiv.innerHTML = `
-            <div class="lesson-info">${infoText} - $${lesson.price.toFixed(2)} per lesson</div>
-            <textarea id="${lessonId}-notes" class="notes-box" placeholder="Enter notes for this lesson..."></textarea>
-            <br>
-            <button class="save-button" data-lessonid="${lessonId}">Save Notes</button>
+          let lessonHtml = `
+            <div class="lesson" id="${lessonId}">
+              <h3>${lessonDate.toDateString()} @ ${lesson.time}${lesson.recurring ? ' (' + lesson.frequency + ')' : ''}</h3>
+              <p>Price: $${lesson.price.toFixed(2)} per lesson</p>
+              <textarea class="notes-area" id="${lessonId}-notes" placeholder="Enter notes for this lesson..."></textarea>
+              <br>
+              <button class="save-note" data-lessonid="${lessonId}">Save Note</button>
+            </div>
           `;
-          
-          lessonsSection.appendChild(lessonDiv);
-          
-          // If a note is already saved for this lesson, populate the textarea.
-          const storedNote = localStorage.getItem(lessonId + '-note');
-          if (storedNote) {
-            document.getElementById(lessonId + '-notes').value = storedNote;
+          container.innerHTML += lessonHtml;
+          // Populate textarea if note exists.
+          const savedNote = localStorage.getItem(lessonId + '-note');
+          if (savedNote) {
+            document.getElementById(lessonId + '-notes').value = savedNote;
           }
         });
       }
       
       // Add event listeners to Save buttons.
-      const saveButtons = document.querySelectorAll('.save-button');
+      const saveButtons = document.querySelectorAll('.save-note');
       saveButtons.forEach(button => {
         button.addEventListener('click', function() {
           const lessonId = this.getAttribute('data-lessonid');
-          const textarea = document.getElementById(lessonId + '-notes');
-          const note = textarea.value;
+          const note = document.getElementById(lessonId + '-notes').value;
           localStorage.setItem(lessonId + '-note', note);
-          alert('Notes saved for this lesson.');
+          alert('Note saved for ' + lessonId);
         });
       });
     });
