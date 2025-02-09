@@ -1,32 +1,6 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f9f9f9;
-    color: #333;
-    margin: 0;
-    padding: 20px;
-  }
-  header {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  .home-buttons {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  .home-button {
-    text-decoration: none;
-    background-color: #0066cc;
-    color: #fff;
-    padding: 15px 30px;
-    margin: 10px;
-    border-radius: 5px;
-  }
-  .home-button:hover {
-    background-color: #0052a3;
-  }
+/* public/style.css */
 
-  /* public/style.css */
+/* ========== GLOBAL STYLES ========== */
 body {
   font-family: Arial, sans-serif;
   background-color: #f9f9f9;
@@ -35,4 +9,144 @@ body {
   padding: 20px;
   line-height: 1.8;
 }
-/* Add the rest of your CSS here */
+
+/* Header and Navigation */
+header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-size: 36px;
+  margin: 0;
+}
+
+nav a {
+  color: #8B4513;
+  text-decoration: none;
+  font-weight: bold;
+  margin-right: 15px;
+}
+
+nav a:hover {
+  color: #A0522D;
+}
+
+/* ========== HOMEPAGE BUTTONS ========== */
+.home-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 50px;
+}
+
+.home-button {
+  display: block;
+  background-color: #8B4513;
+  color: #fff;
+  text-decoration: none;
+  padding: 15px 30px;
+  margin: 10px;
+  border-radius: 5px;
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+  width: 200px;
+}
+
+.home-button:hover {
+  background-color: #A0522D;
+}
+
+/* ========== LAYOUT FOR MONDAY SESSIONS PAGES ========== */
+main {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 20px;
+  align-items: start;
+}
+
+.class-schedule {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.class-card {
+  background-color: #FFF8DC;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  max-width: 320px;
+}
+
+.class-card h2 {
+  margin-top: 0;
+  font-size: 24px;
+}
+
+.tunes-list {
+  font-size: 20px;
+  list-style: disc inside;
+  margin: 10px 0;
+  padding: 0;
+}
+
+/* ========== BUTTONS ON CLASS CARDS ========== */
+button {
+  display: block;
+  margin: 10px auto 0 auto;
+  padding: 10px 20px;
+  background-color: #8B4513;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+button:hover {
+  background-color: #A0522D;
+}
+
+button.selected {
+  outline: 2px solid #FFD700;
+  box-shadow: 0 0 12px #FFD700;
+  background-color: #A0522D;
+}
+
+/* ========== CART SECTION ========== */
+.cart {
+  background-color: #F5CDA7;
+  border-radius: 30px;
+  border: 3px solid #8B4513;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.cart h2 {
+  margin-top: 0;
+}
+
+#cart-items {
+  list-style-type: none;
+  padding: 0;
+}
+
+/* ========== MEDIA QUERY FOR MOBILE ========== */
+@media (max-width: 700px) {
+  main {
+    display: block;
+  }
+  .class-schedule {
+    justify-content: center;
+  }
+  .cart {
+    margin-top: 20px;
+  }
+  .home-button {
+    width: 80%;
+    max-width: 300px;
+  }
+}

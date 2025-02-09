@@ -16,6 +16,7 @@ const cartItems = document.getElementById("cart-items");
 const cartTotal = document.getElementById("cart-total");
 const checkoutButton = document.getElementById("checkout-button");
 
+// Add event listeners to all "Select" buttons on class cards
 const addButtons = document.querySelectorAll(".class-card button");
 addButtons.forEach((button, index) => {
   button.addEventListener("click", () => {
@@ -23,6 +24,7 @@ addButtons.forEach((button, index) => {
   });
 });
 
+// Checkout button functionality
 if (checkoutButton) {
   checkoutButton.addEventListener("click", () => {
     if (cart.length === 0) {
@@ -31,8 +33,9 @@ if (checkoutButton) {
       alert("Checkout functionality is not implemented yet!");
     }
   });
-}
+});
 
+// Toggle the item in/out of the cart
 function toggleCartItem(index, button) {
   const itemInCart = cart.find(item => item.id === classes[index].id);
   if (itemInCart) {
@@ -47,16 +50,18 @@ function toggleCartItem(index, button) {
   updateCart();
 }
 
+// Update the cart display
 function updateCart() {
   if (!cartItems || !cartTotal) return;
   cartItems.innerHTML = "";
   let total = 0;
-  cart.forEach((item) => {
+  cart.forEach(item => {
     const li = document.createElement("li");
     li.textContent = `${item.name} - $${item.price}`;
     cartItems.appendChild(li);
     total += item.price;
   });
+  // Apply discount if 4 or more classes are selected
   if (cart.length >= 4) {
     total = cart.reduce((sum, item) => sum + (item.price === 35 ? 30 : 20), 0);
     cartTotal.textContent = `Total (Discount Applied): $${total}`;
