@@ -19,7 +19,7 @@ app.set('views', path.join(__dirname, 'views'));
 
 // Set up session management
 app.use(session({
-  secret: 'your-secret-key', // change this for production!
+  secret: 'your-secret-key', // Change this in production!
   resave: false,
   saveUninitialized: false
 }));
@@ -30,18 +30,20 @@ const db = new sqlite3.Database('./database.sqlite', (err) => {
     console.error("Error opening database:", err.message);
   } else {
     console.log("Connected to the SQLite database.");
-    // Create tables if they don't exist
+    // Create the users table
     db.run(`CREATE TABLE IF NOT EXISTS users(
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       username TEXT UNIQUE,
       password TEXT
     )`);
+    // Create the lessons table (for group lessons)
     db.run(`CREATE TABLE IF NOT EXISTS lessons(
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       date TEXT,
       time TEXT,
       description TEXT
     )`);
+    // Create the bookings table (for group lessons)
     db.run(`CREATE TABLE IF NOT EXISTS bookings(
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       userId INTEGER,
@@ -51,10 +53,21 @@ const db = new sqlite3.Database('./database.sqlite', (err) => {
       FOREIGN KEY(userId) REFERENCES users(id),
       FOREIGN KEY(lessonId) REFERENCES lessons(id)
     )`);
+    // Create the private_bookings table (for private lessons)
+    db.run(`CREATE TABLE IF NOT EXISTS private_bookings(
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      userId INTEGER,
+      date TEXT,
+      startTime TEXT,
+      duration INTEGER,
+      note TEXT,
+      payment INTEGER,
+      FOREIGN KEY(userId) REFERENCES users(id)
+    )`);
   }
 });
 
-// Pre-populate lessons if none exist
+// Pre-populate the group lessons table if no lessons exist
 db.get("SELECT COUNT(*) as count FROM lessons", (err, row) => {
   if (err) {
     console.error("Error querying lessons count:", err.message);
@@ -115,55 +128,123 @@ app.post('/signup', (req, res) => {
   });
 });
 
-// Logout
+// Logout Route
 app.get('/logout', (req, res) => {
   req.session.destroy();
   res.redirect('/');
 });
 
-// Private Lessons Page (requires login)
-app.get('/private-lessons', (req, res) => {
-  if (!req.session.user) return res.redirect('/login');
-  db.all("SELECT * FROM lessons ORDER BY date, time", [], (err, lessons) => {
-    if (err) {
-      console.error(err.message);
-      lessons = [];
-    }
-    res.render('private-lessons', { user: req.session.user, lessons });
-  });
-});
+// ----- Private Lesson Schedule & Booking Routes ----- //
 
-// Book a Lesson
-app.post('/book-lesson', (req, res) => {
+// GET /private-lesson-schedule: Display the available private lesson slots for the current week
+app.get('/private-lesson-schedule', (req, res) => {
   if (!req.session.user) return res.redirect('/login');
-  const { lessonId, note, payment } = req.body;
-  const sql = 'INSERT INTO bookings (userId, lessonId, note, payment) VALUES (?, ?, ?, ?)';
-  db.run(sql, [req.session.user.id, lessonId, note, payment === 'on' ? 1 : 0], function(err) {
-    if (err) {
-      console.error(err.message);
-      res.send("Error booking lesson.");
-    } else {
-      res.redirect('/fiddlers-log');
-    }
-  });
-});
 
-// Fiddler's Log (booking history)
-app.get('/fiddlers-log', (req, res) => {
-  if (!req.session.user) return res.redirect('/login');
-  const sql = `
-    SELECT b.id as bookingId, l.*, b.note, b.payment
-    FROM bookings b
-    JOIN lessons l ON b.lessonId = l.id
-    WHERE b.userId = ?
-    ORDER BY l.date, l.time
-  `;
-  db.all(sql, [req.session.user.id], (err, bookings) => {
+  // Calculate dates for the current week (assuming week starts on Monday)
+  const now = new Date();
+  const day = now.getDay(); // 0=Sunday, 1=Monday, etc.
+  const diffToMonday = (day + 6) % 7;
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - diffToMonday);
+
+  // Get the dates for Tuesday, Wednesday, Thursday, and Friday
+  const tuesday = new Date(monday); tuesday.setDate(monday.getDate() + 1);
+  const wednesday = new Date(monday); wednesday.setDate(monday.getDate() + 2);
+  const thursday = new Date(monday); thursday.setDate(monday.getDate() + 3);
+  const friday = new Date(monday); friday.setDate(monday.getDate() + 4);
+
+  // Helper function to format a Date as YYYY-MM-DD
+  function formatDate(d) {
+    let month = '' + (d.getMonth() + 1);
+    let day = '' + d.getDate();
+    let year = d.getFullYear();
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+    return [year, month, day].join('-');
+  }
+
+  // Define available private lesson slots per day:
+
+  // Tuesday & Thursday: lessons start on the hour from 8:00 to 14:00 (7 slots, each 55 minutes)
+  const tueThuSlots = [
+    { start: "08:00", duration: 55 },
+    { start: "09:00", duration: 55 },
+    { start: "10:00", duration: 55 },
+    { start: "11:00", duration: 55 },
+    { start: "12:00", duration: 55 },
+    { start: "13:00", duration: 55 },
+    { start: "14:00", duration: 55 }
+  ];
+
+  // Wednesday: lessons start on the half hour from 7:30 to 13:30 (7 slots)
+  const wedSlots = [
+    { start: "07:30", duration: 55 },
+    { start: "08:30", duration: 55 },
+    { start: "09:30", duration: 55 },
+    { start: "10:30", duration: 55 },
+    { start: "11:30", duration: 55 },
+    { start: "12:30", duration: 55 },
+    { start: "13:30", duration: 55 }
+  ];
+
+  // Friday: a mixed schedule:
+  // Morning: available at 08:30 and 09:30, plus a 10:30 slot lasting 30 minutes.
+  // Afternoon: available at 12:00, 13:00, and 14:00 (each 55 minutes).
+  const friSlots = [
+    { start: "08:30", duration: 55 },
+    { start: "09:30", duration: 55 },
+    { start: "10:30", duration: 30 },
+    { start: "12:00", duration: 55 },
+    { start: "13:00", duration: 55 },
+    { start: "14:00", duration: 55 }
+  ];
+
+  // Build the schedule object keyed by date (in YYYY-MM-DD format)
+  let schedule = {};
+  schedule[formatDate(tuesday)] = tueThuSlots;
+  schedule[formatDate(thursday)] = tueThuSlots;
+  schedule[formatDate(wednesday)] = wedSlots;
+  schedule[formatDate(friday)] = friSlots;
+
+  // Get the dates we're scheduling for
+  const dates = Object.keys(schedule);
+
+  // Query existing private lesson bookings for these dates
+  const placeholders = dates.map(() => '?').join(',');
+  const sql = `SELECT * FROM private_bookings WHERE date IN (${placeholders})`;
+  db.all(sql, dates, (err, bookings) => {
     if (err) {
       console.error(err.message);
       bookings = [];
     }
-    res.render('fiddlers-log', { user: req.session.user, bookings });
+    // Mark slots as booked if a matching booking exists
+    bookings.forEach(b => {
+      if (schedule[b.date]) {
+        const slot = schedule[b.date].find(s => s.start === b.startTime);
+        if (slot) {
+          slot.booked = true;
+          slot.bookingInfo = b;
+        }
+      }
+    });
+    // Render the schedule page
+    res.render('private-lesson-schedule', { user: req.session.user, schedule, dates });
+  });
+});
+
+// POST /book-private-lesson: Handle booking a private lesson slot
+app.post('/book-private-lesson', (req, res) => {
+  if (!req.session.user) return res.redirect('/login');
+  const { date, startTime, duration, note, payment } = req.body;
+  const sql = `INSERT INTO private_bookings (userId, date, startTime, duration, note, payment)
+               VALUES (?, ?, ?, ?, ?, ?)`;
+  db.run(sql, [req.session.user.id, date, startTime, duration, note, payment === 'on' ? 1 : 0], function(err) {
+    if (err) {
+      console.error(err.message);
+      res.send("Error booking private lesson.");
+    } else {
+      res.redirect('/private-lesson-schedule');
+    }
   });
 });
 
