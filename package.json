@@ -1,9 +1,10 @@
 {
   "name": "goats-with-03-mini-high",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "A simple Express/EJS project",
+  "main": "app.js",
   "scripts": {
+    "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
