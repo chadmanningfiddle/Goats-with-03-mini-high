@@ -85,7 +85,7 @@ app.get('/monday-sessions-cruising', (req, res) => {
 
 // Fiddler's Log page.
 app.get('/fiddlers-log', (req, res) => {
-  res.render('log', { user: req.session.user });
+  res.render('fiddlers-log', { user: req.session.user });
 });
 
 // Start the server.
