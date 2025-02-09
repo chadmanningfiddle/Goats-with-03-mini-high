@@ -150,3 +150,18 @@ button.selected {
     max-width: 300px;
   }
 }
+
+.slot {
+  padding: 10px;
+  margin: 5px 0;
+  border: 1px solid #8B4513;
+  border-radius: 5px;
+  cursor: pointer;
+  background-color: #fff;
+  color: #222; /* Ensure text is dark */
+  display: inline-block;
+  opacity: 1 !important;
+}
+.slot:hover {
+  background-color: #f0e7df;
+}
