@@ -1,10 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Monday Sessions: Chill</title>
-  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    /* Combined Styles for Monday Sessions Page */
+    .session-card {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      border: 2px solid #8B4513;
+      border-radius: 10px;
+      background-color: #fff8dc;
+    }
+    .session-card h2 {
+      color: #8B4513;
+      margin-bottom: 10px;
+    }
+    .class-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .class-list li {
+      padding: 8px 0;
+      border-bottom: 1px solid #ddd;
+      font-size: 1.1em;
+    }
+    .class-list li:last-child {
+      border-bottom: none;
+    }
+    .total-container {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #e0dcd4;
+      text-align: center;
+      border-radius: 5px;
+    }
+    .total-container .total-amount {
+      font-size: 2.5em;
+      font-weight: bold;
+      color: #8B4513;
+    }
+    .confirm-button {
+      display: block;
+      width: 100%;
+      padding: 15px;
+      background-color: #8B4513;
+      color: #fff;
+      font-size: 1.5em;
+      border: none;
+      border-radius: 5px;
+      margin-top: 15px;
+      cursor: pointer;
+    }
+    .confirm-button:hover {
+      background-color: #A0522D;
+    }
+    .reservation-info {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #555;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -14,81 +74,69 @@
     </p>
     <nav>
       <a href="/">Home</a>
+      <a href="/logout">Logout</a>
     </nav>
   </header>
   <main>
-    <!-- CLASS SCHEDULE -->
-    <section class="class-schedule">
-      <div class="class-card">
-        <h2>Oldtime Morning Groove</h2>
-        <p>9:00 - 9:55 AM | $25</p>
-        <ul class="tunes-list">
-          <li>Swannanoa Waltz</li>
-          <li>Cumberland Gap</li>
-          <li>Tippin Back the Corn</li>
-        </ul>
-        <button>Select</button>
+    <!-- Session Card: Groups all Monday classes in one container -->
+    <div class="session-card">
+      <h2>Available Lessons for Monday</h2>
+      <ul class="class-list" id="class-list">
+        <!-- Monday classes will be inserted here dynamically -->
+      </ul>
+      <div class="total-container">
+        Total: <span class="total-amount" id="total-amount">$0.00</span>
       </div>
-      <div class="class-card">
-        <h2>Twin Fiddles</h2>
-        <p>10:00 - 10:55 AM | $25</p>
-        <ul class="tunes-list">
-          <li>Fireball Mail</li>
-          <li>Goodbye Liza Jane</li>
-          <li>Miss Molly</li>
-        </ul>
-        <button>Select</button>
-      </div>
-      <div class="class-card">
-        <h2>Swing Time</h2>
-        <p>11:00 - 11:55 AM | $25</p>
-        <ul class="tunes-list">
-          <li>12 Bar Blues</li>
-          <li>Dinah</li>
-          <li>Minor Swing</li>
-        </ul>
-        <button>Select</button>
-      </div>
-      <div class="class-card">
-        <h2>Bluegrass Instrumentals: The Classics</h2>
-        <p>12:00 - 12:55 PM | $25</p>
-        <ul class="tunes-list">
-          <li>Clinch Mountain Backstep</li>
-          <li>Soldier's Joy</li>
-          <li>Whiskey Before Breakfast</li>
-        </ul>
-        <button>Select</button>
-      </div>
-      <div class="class-card">
-        <h2>Bluegrass Jam</h2>
-        <p>1:00 - 2:30 PM | $35</p>
-        <ul class="tunes-list">
-          <li>Selected by musicians</li>
-        </ul>
-        <button>Select</button>
-      </div>
-    </section>
-
-    <!-- CART SECTION -->
-    <section class="cart">
-      <h2>Your Classes</h2>
-      <ul id="cart-items"></ul>
-      <p id="cart-total">Total: $0</p>
-      <button id="checkout-button">Checkout</button>
-
+      <button class="confirm-button" id="confirm-button">Confirm</button>
       <div class="reservation-info">
-        <p><strong>To reserve a spot, please follow these steps:</strong></p>
+        <p><strong>To reserve a lesson, please follow these steps:</strong></p>
         <ol>
-          <li>Select classes</li>
-          <li>Make Payment with Zelle or Venmo (outside of the fiddle shack)</li>
-          <li>Email if paying by check or cash before Monday</li>
-          <li>Note: Classes priced at $25 drop to <strong>$20</strong> per class once four or more are selected.</li>
+          <li>Select the lessons you wish to take.</li>
+          <li>Make payment using Zelle (chadmanning@gmail.com), Venmo (chad-manning-18), Cash or Check outside of the Fiddle Shack.</li>
+          <li>The total displayed is the amount due for the lessons booked in the current month.</li>
+          <li>If you have any questions, please contact the Fiddle Shack.</li>
         </ol>
-        <p><strong>Zelle:</strong> chadmanning@gmail.com</p>
-        <p><strong>Venmo:</strong> chad-manning-18</p>
       </div>
-    </section>
+    </div>
   </main>
-  <script src="/tapp.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Try to load Monday sessions from localStorage under "mondayCart".
+      // If not present or empty, load sample data.
+      let mondayCart = JSON.parse(localStorage.getItem('mondayCart'));
+      if (!mondayCart || mondayCart.length === 0) {
+        mondayCart = [
+          { className: "Old-Time Morning Fiddle Groove", time: "8:00 AM", price: 95 },
+          { className: "Twin Fiddles", time: "9:00 AM", price: 95 },
+          { className: "Swing Time", time: "10:00 AM", price: 95 },
+          { className: "Bluegrass Instrumentals: The Classics", time: "11:00 AM", price: 95 },
+          { className: "Bluegrass Jam", time: "1:00 PM", price: 35 }
+        ];
+        localStorage.setItem('mondayCart', JSON.stringify(mondayCart));
+      }
+      
+      const classListEl = document.getElementById('class-list');
+      const totalAmountEl = document.getElementById('total-amount');
+      
+      function renderMondayCart() {
+        classListEl.innerHTML = '';
+        let total = 0;
+        mondayCart.forEach(item => {
+          total += item.price;
+          const li = document.createElement('li');
+          li.textContent = `${item.className} @ ${item.time} - $${item.price.toFixed(2)}`;
+          classListEl.appendChild(li);
+        });
+        totalAmountEl.textContent = `$${total.toFixed(2)}`;
+      }
+      
+      renderMondayCart();
+      
+      // When the Confirm button is clicked, redirect to Fiddler's Log page.
+      document.getElementById('confirm-button').addEventListener('click', function() {
+        window.location.href = "/fiddlers-log";
+      });
+    });
+  </script>
 </body>
 </html>
