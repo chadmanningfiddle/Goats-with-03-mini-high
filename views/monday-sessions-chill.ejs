@@ -195,7 +195,7 @@
         <ol>
           <li>Select classes by clicking the "Select" button on a class card.</li>
           <li>Make Payment with Zelle (chadmanning@gmail.com), Venmo (chad-manning-18), Cash, or Check outside of the Fiddle Shack.</li>
-          <li>The total displayed is the amount due for the lessons you have selected. Note: When 4 or more classes are selected, each \$25 class is discounted to \$20. (Bluegrass Jam remains \$35.)</li>
+          <li>The total displayed is the amount due for the lessons you have selected. Note: When four or more classes are selected, each $25 class is discounted to $20 (Bluegrass Jam remains $35).</li>
           <li>If you have any questions, please contact the Fiddle Shack.</li>
         </ol>
       </div>
@@ -203,14 +203,15 @@
   </main>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Retrieve the Monday sessions cart from localStorage (or default to an empty array)
+      // Retrieve the Monday sessions cart from localStorage.
+      // We default to an empty array if nothing is present.
       let mondayCart = JSON.parse(localStorage.getItem('mondayCart')) || [];
       
       const cartListEl = document.getElementById('cart-list');
       const totalAmountEl = document.getElementById('total-amount');
       
       // Function to render the cart with discount logic:
-      // If there are 4 or more classes selected, each class originally costing $25 is charged $20.
+      // If there are 4 or more classes selected, each $25 class is discounted to $20.
       function renderMondayCart() {
         cartListEl.innerHTML = '';
         if (mondayCart.length === 0) {
@@ -220,16 +221,19 @@
         }
         let total = 0;
         mondayCart.forEach(item => {
-          // Apply discount if there are 4 or more classes and the class price is 25.
-          let price = parseFloat(item.price);
-          if (mondayCart.length >= 4 && price === 25) {
+          let originalPrice = parseFloat(item.price);
+          let price = originalPrice;
+          let discountNote = '';
+          // Apply discount: if 4 or more classes are selected and the class is $25, show discounted price.
+          if (mondayCart.length >= 4 && originalPrice === 25) {
             price = 20;
+            discountNote = ' (Discount applied)';
           }
           total += price;
           const div = document.createElement('div');
           div.style.padding = "5px 0";
           div.style.borderBottom = "1px solid #ddd";
-          div.textContent = `${item.className} @ ${item.time} - $${price.toFixed(2)}`;
+          div.textContent = `${item.className} @ ${item.time} - $${price.toFixed(2)}${discountNote}`;
           cartListEl.appendChild(div);
         });
         totalAmountEl.textContent = `$${total.toFixed(2)}`;
@@ -241,7 +245,6 @@
       const selectButtons = document.querySelectorAll('.select-btn');
       selectButtons.forEach(button => {
         button.addEventListener('click', function() {
-          // Retrieve data attributes from the button.
           const className = this.getAttribute('data-classname');
           const time = this.getAttribute('data-time');
           const price = this.getAttribute('data-price');
