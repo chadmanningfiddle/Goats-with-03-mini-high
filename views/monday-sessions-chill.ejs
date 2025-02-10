@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Monday Sessions: Chill</title>
+  <title>Comfortable Monday Jams</title>
   <link rel="stylesheet" href="/style.css" />
   <style>
     /* Styles for individual class cards */
@@ -98,10 +98,8 @@
 </head>
 <body>
   <header>
-    <h1>Monday Sessions: Chill</h1>
-    <p class="session-date" style="text-align:center; font-size:1.2em; margin:5px 0;">
-      February 17, 2025
-    </p>
+    <h1>Comfortable Monday Jams</h1>
+    <p class="session-date" style="text-align:center; font-size:1.2em; margin:5px 0;">February 17, 2025</p>
     <nav>
       <a href="/">Home</a>
       <a href="/logout">Logout</a>
@@ -119,10 +117,7 @@
           <li>Cumberland Gap</li>
           <li>Tippin Back the Corn</li>
         </ul>
-        <button class="select-btn" 
-                data-classname="Oldtime Morning Groove" 
-                data-time="9:00 AM" 
-                data-price="25">Select</button>
+        <button class="select-btn" data-classname="Oldtime Morning Groove" data-time="9:00 AM" data-price="25">Select</button>
       </div>
       <!-- Card 2 -->
       <div class="class-card">
@@ -133,10 +128,7 @@
           <li>Goodbye Liza Jane</li>
           <li>Miss Molly</li>
         </ul>
-        <button class="select-btn" 
-                data-classname="Twin Fiddles" 
-                data-time="10:00 AM" 
-                data-price="25">Select</button>
+        <button class="select-btn" data-classname="Twin Fiddles" data-time="10:00 AM" data-price="25">Select</button>
       </div>
       <!-- Card 3 -->
       <div class="class-card">
@@ -147,10 +139,7 @@
           <li>Dinah</li>
           <li>Minor Swing</li>
         </ul>
-        <button class="select-btn" 
-                data-classname="Swing Time" 
-                data-time="11:00 AM" 
-                data-price="25">Select</button>
+        <button class="select-btn" data-classname="Swing Time" data-time="11:00 AM" data-price="25">Select</button>
       </div>
       <!-- Card 4 -->
       <div class="class-card">
@@ -161,10 +150,7 @@
           <li>Soldier's Joy</li>
           <li>Whiskey Before Breakfast</li>
         </ul>
-        <button class="select-btn" 
-                data-classname="Bluegrass Instrumentals: The Classics" 
-                data-time="12:00 PM" 
-                data-price="25">Select</button>
+        <button class="select-btn" data-classname="Bluegrass Instrumentals: The Classics" data-time="12:00 PM" data-price="25">Select</button>
       </div>
       <!-- Card 5 -->
       <div class="class-card">
@@ -173,10 +159,7 @@
         <ul class="tunes-list">
           <li>Selected by musicians</li>
         </ul>
-        <button class="select-btn" 
-                data-classname="Bluegrass Jam" 
-                data-time="1:00 PM" 
-                data-price="35">Select</button>
+        <button class="select-btn" data-classname="Bluegrass Jam" data-time="1:00 PM" data-price="35">Select</button>
       </div>
     </section>
 
@@ -193,7 +176,7 @@
       <div class="reservation-info">
         <p><strong>To reserve your sessions, please follow these steps:</strong></p>
         <ol>
-          <li>Select classes by clicking the "Select" button on a class card.</li>
+          <li>Select classes by clicking the "Select" button on a class card. (Click again to deselect.)</li>
           <li>Make Payment with Zelle (chadmanning@gmail.com), Venmo (chad-manning-18), Cash, or Check outside of the Fiddle Shack.</li>
           <li>The total displayed is the amount due for the lessons you have selected. Note: When four or more classes are selected, each $25 class is discounted to $20 (Bluegrass Jam remains $35).</li>
           <li>If you have any questions, please contact the Fiddle Shack.</li>
@@ -203,15 +186,14 @@
   </main>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Retrieve the Monday sessions cart from localStorage.
-      // Default to an empty array (do not pre-populate).
+      // Retrieve the Monday sessions cart from localStorage (default to an empty array)
       let mondayCart = JSON.parse(localStorage.getItem('mondayCart')) || [];
       
       const cartListEl = document.getElementById('cart-list');
       const totalAmountEl = document.getElementById('total-amount');
       
-      // Function to render the cart with discount logic.
-      // If there are 4 or more classes selected, each $25 class is discounted to $20.
+      // Function to render the cart with discount logic:
+      // If 4 or more classes are selected, each $25 class is discounted to $20.
       function renderMondayCart() {
         cartListEl.innerHTML = '';
         if (mondayCart.length === 0) {
@@ -241,7 +223,6 @@
       renderMondayCart();
       
       // Attach event listeners to all "Select" buttons on the individual class cards.
-      // These buttons now act as toggles: clicking "Select" adds the class; clicking "Deselect" removes it.
       const selectButtons = document.querySelectorAll('.select-btn');
       selectButtons.forEach(button => {
         button.addEventListener('click', function() {
@@ -253,11 +234,11 @@
           // Check if this class is already in the cart.
           const index = mondayCart.findIndex(item => item.className === className && item.time === time);
           if (index === -1) {
-            // Not in cart: add it.
+            // Add the class.
             mondayCart.push(selectedClass);
             this.textContent = "Deselect";
           } else {
-            // In cart: remove it.
+            // Remove the class.
             mondayCart.splice(index, 1);
             this.textContent = "Select";
           }

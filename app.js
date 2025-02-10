@@ -13,12 +13,12 @@ app.set('views', path.join(__dirname, 'views'));
 // Serve static files from the public folder.
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Parse URL-encoded bodies (for form submissions)
+// Parse URL-encoded bodies (for form submissions).
 app.use(express.urlencoded({ extended: true }));
 
-// Session middleware setup.
+// Set up session middleware.
 app.use(session({
-  secret: 'your-secret-key', // Replace with your secret in production.
+  secret: 'your-secret-key', // Replace with your own secret in production.
   resave: false,
   saveUninitialized: false
 }));
@@ -38,6 +38,7 @@ app.get('/login', (req, res) => {
 // Process login.
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
+  // Dummy authentication – replace with your real logic.
   if (username === 'admin' && password === 'password') {
     req.session.user = { username };
     res.redirect('/');
@@ -63,6 +64,7 @@ app.post('/signup', (req, res) => {
   if (password !== confirmPassword) {
     return res.render('signup', { error: 'Passwords do not match' });
   }
+  // Here you would normally store the new user in your database.
   req.session.user = { username };
   res.redirect('/');
 });
@@ -73,18 +75,19 @@ app.get('/private-lessons', (req, res) => {
   res.render('private-lessons', { user: req.session.user });
 });
 
-app.get('/monday-calendar', (req, res) => {
-  res.render('monday-calendar', { user: req.session.user });
-});
-
-// Monday Sessions: Chill.
-app.get('/monday-sessions-chill', (req, res) => {
-  res.render('monday-sessions-chill', { user: req.session.user });
-});
-
-// Monday Sessions: Cruising.
+// Monday Sessions: Cruising page.
 app.get('/monday-sessions-cruising', (req, res) => {
   res.render('monday-sessions-cruising', { user: req.session.user });
+});
+
+// Monday Sessions: Comfortable Monday Jams (renamed from monday-sessions-chill).
+app.get('/comfortable-monday-jams', (req, res) => {
+  res.render('comfortable-monday-jams', { user: req.session.user });
+});
+
+// (Optional) Monday Calendar page.
+app.get('/monday-calendar', (req, res) => {
+  res.render('monday-calendar', { user: req.session.user });
 });
 
 // Fiddler's Log page.
