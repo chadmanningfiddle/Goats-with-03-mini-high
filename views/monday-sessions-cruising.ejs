@@ -71,29 +71,100 @@
       </div>
     </section>
 
-    <!-- CART SECTION -->
-    <section class="cart">
-      <h2>Your Classes</h2>
-      <ul id="cart-items"></ul>
-      <p id="cart-total">Total: $0</p>
-      <button id="checkout-button">Checkout</button>
+ <!-- NEW CART SECTION: Displays only classes the user has selected -->
+ <section class="cart">
+  <h2>Your Sessions</h2>
+  <div id="cart-list">
+    <!-- Cart items will be inserted here -->
+  </div>
+  <div class="total-container">
+    Total: <span class="total-amount" id="total-amount">$0.00</span>
+  </div>
+  <button class="confirm-button" id="confirm-button">Confirm</button>
+  <div class="reservation-info">
+    <p><strong>To reserve your sessions, please follow these steps:</strong></p>
+    <ol>
+      <li>Select classes by clicking the "Select" button on a class card. (Click again to deselect.)</li>
+      <li>Total cost indicated in cart. Note: When four or more classes are selected, each $25 class is discounted to $20</li>
 
-      <div class="reservation-info">
-        <p><strong>To reserve your sessions, please follow these steps:</strong></p>
-        <ol>
-          <li>Select classes by clicking the "Select" button on a class card. (Click again to deselect.)</li>
-          <li>Total cost indicated in cart. Note: When four or more classes are selected, each $25 class is discounted to $20</li>
+      <li>MAKE PAYMENT USING ZELLE: chadmanning@gmail.com.  VENMO: chad-manning-18</li> 
 
-          <li>Make Payment with Zelle (chadmanning@gmail.com), Venmo (chad-manning-18)outside of the Fiddle Shack.</li>
-
-          <li>After you've made payment, confirm your lessons and mark them as paid in your Fiddler's Log</li>
-          <li>If you are paying with cash or check please drop me an email, letting me know your class choices</li>
-          
-        </ol>
-      </div>
-    </section>
-  </main>
-  <script>
-  </script>
+      <li>After you've made payment, confirm your lessons and mark them as paid in your Fiddler's Log</li>
+      
+      <li>If you are paying with cash or check please drop me an email, letting me know your class choices</li>
+      
+    </ol>
+  </div>
+</section>
+</main>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Retrieve the Monday sessions cart from localStorage (default to an empty array)
+  let mondayCart = JSON.parse(localStorage.getItem('mondayCart')) || [];
+  
+  const cartListEl = document.getElementById('cart-list');
+  const totalAmountEl = document.getElementById('total-amount');
+  
+  // Function to render the cart with discount logic:
+  // If 4 or more classes are selected, each $25 class is discounted to $20.
+  function renderMondayCart() {
+    cartListEl.innerHTML = '';
+    if (mondayCart.length === 0) {
+      cartListEl.innerHTML = '<p class="empty-message">No classes selected.</p>';
+      totalAmountEl.textContent = '$0.00';
+      return;
+    }
+    let total = 0;
+    mondayCart.forEach(item => {
+      let originalPrice = parseFloat(item.price);
+      let price = originalPrice;
+      let discountNote = '';
+      if (mondayCart.length >= 4 && originalPrice === 25) {
+        price = 20;
+        discountNote = ' (Discount applied)';
+      }
+      total += price;
+      const div = document.createElement('div');
+      div.style.padding = "5px 0";
+      div.style.borderBottom = "1px solid #ddd";
+      div.textContent = `${item.className} @ ${item.time} - $${price.toFixed(2)}${discountNote}`;
+      cartListEl.appendChild(div);
+    });
+    totalAmountEl.textContent = `$${total.toFixed(2)}`;
+  }
+  
+  renderMondayCart();
+  
+  // Attach event listeners to all "Select" buttons on the individual class cards.
+  const selectButtons = document.querySelectorAll('.select-btn');
+  selectButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const className = this.getAttribute('data-classname');
+      const time = this.getAttribute('data-time');
+      const price = this.getAttribute('data-price');
+      const selectedClass = { className, time, price };
+      
+      // Check if this class is already in the cart.
+      const index = mondayCart.findIndex(item => item.className === className && item.time === time);
+      if (index === -1) {
+        // Add the class.
+        mondayCart.push(selectedClass);
+        this.textContent = "Deselect";
+      } else {
+        // Remove the class.
+        mondayCart.splice(index, 1);
+        this.textContent = "Select";
+      }
+      localStorage.setItem('mondayCart', JSON.stringify(mondayCart));
+      renderMondayCart();
+    });
+  });
+  
+  // When the Confirm button is clicked, redirect to the Fiddler's Log page.
+  document.getElementById('confirm-button').addEventListener('click', function() {
+    window.location.href = "/fiddlers-log";
+  });
+});
+</script>
 </body>
 </html>
