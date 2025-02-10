@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Monday Sessions: Slow and Steady</title>
+  <title>Monday Sessions: Chill</title>
   <link rel="stylesheet" href="/style.css" />
   <style>
     /* Styles for individual class cards */
@@ -98,7 +98,7 @@
 </head>
 <body>
   <header>
-    <h1>Monday Sessions: Slow and Steady</h1>
+    <h1>Monday Sessions: Chill</h1>
     <p class="session-date" style="text-align:center; font-size:1.2em; margin:5px 0;">
       February 17, 2025
     </p>
@@ -119,7 +119,6 @@
           <li>Cumberland Gap</li>
           <li>Tippin Back the Corn</li>
         </ul>
-        <!-- The button has data attributes with class details -->
         <button class="select-btn" 
                 data-classname="Oldtime Morning Groove" 
                 data-time="9:00 AM" 
@@ -196,7 +195,7 @@
         <ol>
           <li>Select classes by clicking the "Select" button on a class card.</li>
           <li>Make Payment with Zelle (chadmanning@gmail.com), Venmo (chad-manning-18), Cash, or Check outside of the Fiddle Shack.</li>
-          <li>The total displayed is the amount due for the lessons you have selected.</li>
+          <li>The total displayed is the amount due for the lessons you have selected. Note: When 4 or more classes are selected, each \$25 class is discounted to \$20. (Bluegrass Jam remains \$35.)</li>
           <li>If you have any questions, please contact the Fiddle Shack.</li>
         </ol>
       </div>
@@ -204,13 +203,14 @@
   </main>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Retrieve Monday cart from localStorage; if not present, start with an empty array.
+      // Retrieve the Monday sessions cart from localStorage (or default to an empty array)
       let mondayCart = JSON.parse(localStorage.getItem('mondayCart')) || [];
       
       const cartListEl = document.getElementById('cart-list');
       const totalAmountEl = document.getElementById('total-amount');
       
-      // Function to render the cart: if empty, show an empty message; otherwise, list items and total.
+      // Function to render the cart with discount logic:
+      // If there are 4 or more classes selected, each class originally costing $25 is charged $20.
       function renderMondayCart() {
         cartListEl.innerHTML = '';
         if (mondayCart.length === 0) {
@@ -220,11 +220,16 @@
         }
         let total = 0;
         mondayCart.forEach(item => {
-          total += parseFloat(item.price);
+          // Apply discount if there are 4 or more classes and the class price is 25.
+          let price = parseFloat(item.price);
+          if (mondayCart.length >= 4 && price === 25) {
+            price = 20;
+          }
+          total += price;
           const div = document.createElement('div');
           div.style.padding = "5px 0";
           div.style.borderBottom = "1px solid #ddd";
-          div.textContent = `${item.className} @ ${item.time} - $${parseFloat(item.price).toFixed(2)}`;
+          div.textContent = `${item.className} @ ${item.time} - $${price.toFixed(2)}`;
           cartListEl.appendChild(div);
         });
         totalAmountEl.textContent = `$${total.toFixed(2)}`;
@@ -232,7 +237,7 @@
       
       renderMondayCart();
       
-      // Add event listeners to all "Select" buttons on individual class cards.
+      // Add event listeners to all "Select" buttons on the individual class cards.
       const selectButtons = document.querySelectorAll('.select-btn');
       selectButtons.forEach(button => {
         button.addEventListener('click', function() {
@@ -240,16 +245,14 @@
           const className = this.getAttribute('data-classname');
           const time = this.getAttribute('data-time');
           const price = this.getAttribute('data-price');
-          // Create an object for the selected class.
           const selectedClass = { className, time, price };
           
-          // Optionally, check if this class is already in the cart.
+          // Check if this class is already in the cart.
           const exists = mondayCart.some(item => item.className === className && item.time === time);
           if (!exists) {
             mondayCart.push(selectedClass);
             localStorage.setItem('mondayCart', JSON.stringify(mondayCart));
             renderMondayCart();
-            // Optionally change button text to "Selected" or disable the button.
             this.textContent = "Selected";
             this.disabled = true;
           } else {
