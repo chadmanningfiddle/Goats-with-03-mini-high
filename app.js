@@ -73,6 +73,10 @@ app.get('/private-lessons', (req, res) => {
   res.render('private-lessons', { user: req.session.user });
 });
 
+app.get('/monday-calendar', (req, res) => {
+  res.render('monday-calendar', { user: req.session.user });
+});
+
 // Monday Sessions: Chill.
 app.get('/monday-sessions-chill', (req, res) => {
   res.render('monday-sessions-chill', { user: req.session.user });

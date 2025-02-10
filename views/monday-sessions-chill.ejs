@@ -204,13 +204,13 @@
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       // Retrieve the Monday sessions cart from localStorage.
-      // We default to an empty array if nothing is present.
+      // Default to an empty array (do not pre-populate).
       let mondayCart = JSON.parse(localStorage.getItem('mondayCart')) || [];
       
       const cartListEl = document.getElementById('cart-list');
       const totalAmountEl = document.getElementById('total-amount');
       
-      // Function to render the cart with discount logic:
+      // Function to render the cart with discount logic.
       // If there are 4 or more classes selected, each $25 class is discounted to $20.
       function renderMondayCart() {
         cartListEl.innerHTML = '';
@@ -224,7 +224,6 @@
           let originalPrice = parseFloat(item.price);
           let price = originalPrice;
           let discountNote = '';
-          // Apply discount: if 4 or more classes are selected and the class is $25, show discounted price.
           if (mondayCart.length >= 4 && originalPrice === 25) {
             price = 20;
             discountNote = ' (Discount applied)';
@@ -241,7 +240,8 @@
       
       renderMondayCart();
       
-      // Add event listeners to all "Select" buttons on the individual class cards.
+      // Attach event listeners to all "Select" buttons on the individual class cards.
+      // These buttons now act as toggles: clicking "Select" adds the class; clicking "Deselect" removes it.
       const selectButtons = document.querySelectorAll('.select-btn');
       selectButtons.forEach(button => {
         button.addEventListener('click', function() {
@@ -251,16 +251,18 @@
           const selectedClass = { className, time, price };
           
           // Check if this class is already in the cart.
-          const exists = mondayCart.some(item => item.className === className && item.time === time);
-          if (!exists) {
+          const index = mondayCart.findIndex(item => item.className === className && item.time === time);
+          if (index === -1) {
+            // Not in cart: add it.
             mondayCart.push(selectedClass);
-            localStorage.setItem('mondayCart', JSON.stringify(mondayCart));
-            renderMondayCart();
-            this.textContent = "Selected";
-            this.disabled = true;
+            this.textContent = "Deselect";
           } else {
-            alert("This class is already selected.");
+            // In cart: remove it.
+            mondayCart.splice(index, 1);
+            this.textContent = "Select";
           }
+          localStorage.setItem('mondayCart', JSON.stringify(mondayCart));
+          renderMondayCart();
         });
       });
       
