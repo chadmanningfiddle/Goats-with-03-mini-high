@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Monday Sessions Calendar</title>
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    /* Calendar styling */
+    table.calendar {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px auto;
+      max-width: 800px;
+    }
+    table.calendar th,
+    table.calendar td {
+      border: 1px solid #ccc;
+      text-align: center;
+      padding: 10px;
+      vertical-align: top;
+      height: 80px;
+    }
+    table.calendar th {
+      background-color: #e0dcd4;
+    }
+    /* Highlight Monday cells */
+    table.calendar td.monday {
+      background-color: #fff8dc;
+      cursor: pointer;
+      position: relative;
+    }
+    table.calendar td.monday:hover {
+      background-color: #f0e7df;
+    }
+    /* Style for listing Monday class titles inside a Monday cell */
+    .monday-classes {
+      font-size: 0.9em;
+      margin-top: 5px;
+      text-align: left;
+      position: absolute;
+      left: 5px;
+      bottom: 5px;
+      right: 5px;
+      background: rgba(255,255,255,0.8);
+      padding: 3px;
+      border-radius: 3px;
+    }
+    .monday-classes ul {
+      list-style: none;
+      padding-left: 10px;
+      margin: 0;
+    }
+    .monday-classes li {
+      font-size: 0.8em;
+      margin: 2px 0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Monday Sessions Calendar</h1>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/logout">Logout</a>
+    </nav>
+  </header>
+  <main>
+    <div id="calendar-container"></div>
+  </main>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Define the Monday session titles.
+      const mondayClasses = [
+        "Oldtime Morning Groove",
+        "Twin Fiddles",
+        "Swing Time",
+        "Bluegrass Instrumentals: The Classics",
+        "Bluegrass Jam"
+      ];
+      
+      // Get the current month and year.
+      const today = new Date();
+      const month = today.getMonth();
+      const year = today.getFullYear();
+      
+      // Get the first day of the month and number of days.
+      const firstDay = new Date(year, month, 1);
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      
+      // Build the calendar HTML.
+      let calendarHTML = '<table class="calendar">';
+      
+      // Table header: Days of the week.
+      const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      calendarHTML += '<tr>';
+      daysOfWeek.forEach(day => {
+         calendarHTML += `<th>${day}</th>`;
+      });
+      calendarHTML += '</tr>';
+      
+      let date = 1;
+      // Create up to 6 rows for the calendar.
+      for (let i = 0; i < 6; i++) {
+        calendarHTML += '<tr>';
+        for (let j = 0; j < 7; j++) {
+          if (i === 0 && j < firstDay.getDay()) {
+            calendarHTML += '<td></td>';
+          } else if (date > daysInMonth) {
+            calendarHTML += '<td></td>';
+          } else {
+            // Create a date object for the current cell.
+            let cellDate = new Date(year, month, date);
+            // Determine if the cell is a Monday (getDay() returns 1 for Monday).
+            let cellClass = (cellDate.getDay() === 1) ? 'monday' : '';
+            calendarHTML += `<td class="${cellClass}" data-date="${date}" data-month="${month}" data-year="${year}">${date}`;
+            // If it's a Monday cell, list the class titles.
+            if (cellClass === 'monday') {
+              calendarHTML += `<div class="monday-classes"><ul>`;
+              mondayClasses.forEach(cls => {
+                calendarHTML += `<li>${cls}</li>`;
+              });
+              calendarHTML += `</ul></div>`;
+            }
+            calendarHTML += '</td>';
+            date++;
+          }
+        }
+        calendarHTML += '</tr>';
+      }
+      calendarHTML += '</table>';
+      
+      document.getElementById('calendar-container').innerHTML = calendarHTML;
+      
+      // Attach click listeners only to Monday cells.
+      const mondayCells = document.querySelectorAll('td.monday');
+      mondayCells.forEach(cell => {
+        cell.addEventListener('click', function() {
+          // Get the day number from the clicked cell.
+          const day = parseInt(this.getAttribute('data-date'));
+          // Using an even/odd rule: even day -> cruising; odd day -> chill.
+          if (day % 2 === 0) {
+            window.location.href = "/monday-sessions-cruising";
+          } else {
+            window.location.href = "/monday-sessions-chill";
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
