@@ -15,52 +15,59 @@
       margin-bottom: 30px;
     }
     .class-card {
-      background-color: #fff;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      padding: 15px;
-      width: 300px;
-      box-shadow: 2px 2px 6px rgba(0,0,0,0.1);
+      background-color: #fff8dc;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      max-width: 320px;
     }
     .class-card h2 {
-      font-size: 1.3em;
       margin-top: 0;
+      font-size: 24px;
       color: #8B4513;
     }
-    .class-card p, .class-card ul {
-      margin: 5px 0;
-      font-size: 1em;
+    .tunes-list {
+      font-size: 20px;
+      list-style: disc inside;
+      margin: 10px 0;
+      padding: 0;
     }
-    .class-card ul.tunes-list {
-      padding-left: 20px;
-    }
-    .class-card button {
+    /* Buttons on class cards */
+    button {
       display: block;
       margin: 10px auto 0 auto;
-      padding: 8px 12px;
+      padding: 10px 20px;
       background-color: #8B4513;
-      color: #fff;
+      color: white;
       border: none;
-      border-radius: 3px;
+      border-radius: 5px;
       cursor: pointer;
+      font-size: 18px;
     }
-    .class-card button:hover {
+    button:hover {
       background-color: #A0522D;
     }
-    /* New Cart Section Styles */
-    .cart {
-      max-width: 800px;
-      margin: 20px auto;
-      padding: 20px;
-      border: 2px solid #8B4513;
-      border-radius: 10px;
-      background-color: #fff8dc;
+    button.selected {
+      outline: 2px solid #FFD700;
+      box-shadow: 0 0 12px #FFD700;
+      background-color: #A0522D;
     }
-    .empty-message {
-      text-align: center;
-      font-style: italic;
-      color: #777;
-      margin: 10px 0;
+    /* Cart section styles */
+    .cart {
+      background-color: #F5CDA7;
+      border-radius: 30px;
+      border: 3px solid #8B4513;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin: 20px auto;
+      max-width: 800px;
+    }
+    .cart h2 {
+      margin-top: 0;
+    }
+    #cart-list {
+      list-style-type: none;
+      padding: 0;
     }
     .total-container {
       margin-top: 20px;
@@ -74,32 +81,12 @@
       font-weight: bold;
       color: #8B4513;
     }
-    .confirm-button {
-      display: block;
-      width: 100%;
-      padding: 15px;
-      background-color: #8B4513;
-      color: #fff;
-      font-size: 1.5em;
-      border: none;
-      border-radius: 5px;
-      margin-top: 15px;
-      cursor: pointer;
-    }
-    .confirm-button:hover {
-      background-color: #A0522D;
-    }
-    .reservation-info {
-      margin-top: 20px;
-      font-size: 14px;
-      color: #555;
-    }
   </style>
 </head>
 <body>
   <header>
     <h1>Monday Sessions: Relaxed Pace</h1>
-    <p class="session-date" style="text-align:center; font-size:1.2em; margin:5px 0;">February 17th, March 10th, March 24th</p>
+    <p class="session-date" style="text-align:center; font-size:1.2em; margin:5px 0;">Mon Feb 17 2025</p>
     <nav>
       <a href="/">Home</a>
       <a href="/logout">Logout</a>
@@ -108,7 +95,6 @@
   <main>
     <!-- CLASS SCHEDULE: Individual class cards -->
     <section class="class-schedule">
-      <!-- Card 1 -->
       <div class="class-card">
         <h2>Oldtime Morning Groove</h2>
         <p>9:00 - 9:55 AM | $25</p>
@@ -117,12 +103,8 @@
           <li>Cumberland Gap</li>
           <li>Tippin Back the Corn</li>
         </ul>
-        <button class="select-btn" 
-                data-classname="Oldtime Morning Groove" 
-                data-time="9:00 AM" 
-                data-price="25">Select</button>
+        <button class="select-btn" data-classname="Oldtime Morning Groove" data-time="9:00 AM" data-price="25">Select</button>
       </div>
-      <!-- Card 2 -->
       <div class="class-card">
         <h2>Twin Fiddles</h2>
         <p>10:00 - 10:55 AM | $25</p>
@@ -131,12 +113,8 @@
           <li>Goodbye Liza Jane</li>
           <li>Miss Molly</li>
         </ul>
-        <button class="select-btn" 
-                data-classname="Twin Fiddles" 
-                data-time="10:00 AM" 
-                data-price="25">Select</button>
+        <button class="select-btn" data-classname="Twin Fiddles" data-time="10:00 AM" data-price="25">Select</button>
       </div>
-      <!-- Card 3 -->
       <div class="class-card">
         <h2>Swing Time</h2>
         <p>11:00 - 11:55 AM | $25</p>
@@ -145,12 +123,8 @@
           <li>Dinah</li>
           <li>Minor Swing</li>
         </ul>
-        <button class="select-btn" 
-                data-classname="Swing Time" 
-                data-time="11:00 AM" 
-                data-price="25">Select</button>
+        <button class="select-btn" data-classname="Swing Time" data-time="11:00 AM" data-price="25">Select</button>
       </div>
-      <!-- Card 4 -->
       <div class="class-card">
         <h2>Bluegrass Instrumentals: The Classics</h2>
         <p>12:00 - 12:55 PM | $25</p>
@@ -159,26 +133,18 @@
           <li>Soldier's Joy</li>
           <li>Whiskey Before Breakfast</li>
         </ul>
-        <button class="select-btn" 
-                data-classname="Bluegrass Instrumentals: The Classics" 
-                data-time="12:00 PM" 
-                data-price="25">Select</button>
+        <button class="select-btn" data-classname="Bluegrass Instrumentals: The Classics" data-time="12:00 PM" data-price="25">Select</button>
       </div>
-      <!-- Card 5 -->
       <div class="class-card">
         <h2>Bluegrass Jam</h2>
         <p>1:00 - 2:30 PM | $35</p>
         <ul class="tunes-list">
           <li>Selected by musicians</li>
         </ul>
-        <button class="select-btn" 
-                data-classname="Bluegrass Jam" 
-                data-time="1:00 PM" 
-                data-price="35">Select</button>
+        <button class="select-btn" data-classname="Bluegrass Jam" data-time="1:00 PM" data-price="35">Select</button>
       </div>
     </section>
-
-    <!-- NEW CART SECTION: Displays only classes the user has selected -->
+    <!-- CART SECTION -->
     <section class="cart">
       <h2>Your Sessions</h2>
       <div id="cart-list">
@@ -193,7 +159,7 @@
         <ol>
           <li>Select classes by clicking the "Select" button on a class card. (Click again to deselect.)</li>
           <li>Make Payment with Zelle (chadmanning@gmail.com), Venmo (chad-manning-18), Cash, or Check outside of the Fiddle Shack.</li>
-          <li>The total displayed is the amount due for the lessons you have selected. Note: When four or more classes are selected, each $25 class is discounted to $20 (Bluegrass Jam remains $35).</li>
+          <li>Note: When four or more classes are selected, each $25 class is discounted to $20 (Bluegrass Jam remains $35).</li>
           <li>If you have any questions, please contact the Fiddle Shack.</li>
         </ol>
       </div>
@@ -201,7 +167,7 @@
   </main>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Retrieve the Monday sessions cart from localStorage; default to an empty array.
+      // Retrieve the Monday sessions cart from localStorage (or default to an empty array).
       let mondayCart = JSON.parse(localStorage.getItem('mondayCart')) || [];
       
       const cartListEl = document.getElementById('cart-list');
@@ -236,7 +202,7 @@
       
       renderMondayCart();
       
-      // Attach event listeners to "Select" buttons (toggle selection).
+      // Attach toggle listeners to all "Select" buttons.
       const selectButtons = document.querySelectorAll('.select-btn');
       selectButtons.forEach(button => {
         button.addEventListener('click', function() {
@@ -258,7 +224,7 @@
         });
       });
       
-      // Confirm button: redirect to the Fiddler's Log page.
+      // Confirm button redirects to Fiddler's Log page.
       document.getElementById('confirm-button').addEventListener('click', function() {
         window.location.href = "/fiddlers-log";
       });

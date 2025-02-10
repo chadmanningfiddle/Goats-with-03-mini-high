@@ -1,33 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Monday Sessions: Moving Along</title>
   <link rel="stylesheet" href="/style.css" />
+  <style>
+    /* Styles for individual class cards – similar to the Relaxed Pace page */
+    .class-schedule {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .class-card {
+      background-color: #fff8dc;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      max-width: 320px;
+    }
+    .class-card h2 {
+      margin-top: 0;
+      font-size: 24px;
+      color: #8B4513;
+    }
+    .tunes-list {
+      font-size: 20px;
+      list-style: disc inside;
+      margin: 10px 0;
+      padding: 0;
+    }
+    button {
+      display: block;
+      margin: 10px auto 0 auto;
+      padding: 10px 20px;
+      background-color: #8B4513;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 18px;
+    }
+    button:hover {
+      background-color: #A0522D;
+    }
+    button.selected {
+      outline: 2px solid #FFD700;
+      box-shadow: 0 0 12px #FFD700;
+      background-color: #A0522D;
+    }
+    /* Cart section styles */
+    .cart {
+      background-color: #F5CDA7;
+      border-radius: 30px;
+      border: 3px solid #8B4513;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin: 20px auto;
+      max-width: 800px;
+    }
+    .cart h2 {
+      margin-top: 0;
+    }
+    #cart-list {
+      list-style-type: none;
+      padding: 0;
+    }
+    .total-container {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #e0dcd4;
+      text-align: center;
+      border-radius: 5px;
+    }
+    .total-container .total-amount {
+      font-size: 2.5em;
+      font-weight: bold;
+      color: #8B4513;
+    }
+  </style>
 </head>
 <body>
   <header>
     <h1>Monday Sessions: Moving Along</h1>
-    <p class="session-date" style="text-align:center; font-size:1.2em; margin:5px 0;">
-  February 10th, 27th
-    </p>
+    <p class="session-date" style="text-align:center; font-size:1.2em; margin:5px 0;">Mon Feb 10 2025</p>
     <nav>
       <a href="/">Home</a>
+      <a href="/logout">Logout</a>
     </nav>
   </header>
   <main>
-    <!-- CLASS SCHEDULE -->
+    <!-- CLASS SCHEDULE: Individual class cards -->
     <section class="class-schedule">
       <div class="class-card">
         <h2>Oldtime Morning Groove</h2>
         <p>9:00 - 9:55 AM | $25</p>
         <ul class="tunes-list">
+          <li>Swannanoa Waltz</li>
           <li>Cumberland Gap</li>
-          <li>Tippin' Back the Corn</li>
-          <li>Sail Away Ladies</li>
+          <li>Tippin Back the Corn</li>
         </ul>
-        <button>Select</button>
+        <button class="select-btn" data-classname="Oldtime Morning Groove" data-time="9:00 AM" data-price="25">Select</button>
       </div>
       <div class="class-card">
         <h2>Twin Fiddles</h2>
@@ -36,9 +111,8 @@
           <li>Fireball Mail</li>
           <li>Goodbye Liza Jane</li>
           <li>Miss Molly</li>
-          <li>Deep Water</li>
         </ul>
-        <button>Select</button>
+        <button class="select-btn" data-classname="Twin Fiddles" data-time="10:00 AM" data-price="25">Select</button>
       </div>
       <div class="class-card">
         <h2>Swing Time</h2>
@@ -47,19 +121,18 @@
           <li>12 Bar Blues</li>
           <li>Dinah</li>
           <li>Minor Swing</li>
-          <li>Lady Be Good</li>
         </ul>
-        <button>Select</button>
+        <button class="select-btn" data-classname="Swing Time" data-time="11:00 AM" data-price="25">Select</button>
       </div>
       <div class="class-card">
-        <h2>Bluegrass Instrumentals: High Gear</h2>
+        <h2>Bluegrass Instrumentals: The Classics</h2>
         <p>12:00 - 12:55 PM | $25</p>
         <ul class="tunes-list">
           <li>Clinch Mountain Backstep</li>
-          <li>Road to Columbus</li>
-          <li>Big Sciota</li>
+          <li>Soldier's Joy</li>
+          <li>Whiskey Before Breakfast</li>
         </ul>
-        <button>Select</button>
+        <button class="select-btn" data-classname="Bluegrass Instrumentals: The Classics" data-time="12:00 PM" data-price="25">Select</button>
       </div>
       <div class="class-card">
         <h2>Bluegrass Jam</h2>
@@ -67,104 +140,90 @@
         <ul class="tunes-list">
           <li>Selected by musicians</li>
         </ul>
-        <button>Select</button>
+        <button class="select-btn" data-classname="Bluegrass Jam" data-time="1:00 PM" data-price="35">Select</button>
       </div>
     </section>
-
- <!-- NEW CART SECTION: Displays only classes the user has selected -->
- <section class="cart">
-  <h2>Your Sessions</h2>
-  <div id="cart-list">
-    <!-- Cart items will be inserted here -->
-  </div>
-  <div class="total-container">
-    Total: <span class="total-amount" id="total-amount">$0.00</span>
-  </div>
-  <button class="confirm-button" id="confirm-button">Confirm</button>
-  <div class="reservation-info">
-    <p><strong>To reserve your sessions, please follow these steps:</strong></p>
-    <ol>
-      <li>Select classes by clicking the "Select" button on a class card. (Click again to deselect.)</li>
-      <li>Total cost indicated in cart. Note: When four or more classes are selected, each $25 class is discounted to $20</li>
-
-      <li>MAKE PAYMENT USING ZELLE: chadmanning@gmail.com.  VENMO: chad-manning-18</li> 
-
-      <li>After you've made payment, confirm your lessons and mark them as paid in your Fiddler's Log</li>
+    <!-- CART SECTION -->
+    <section class="cart">
+      <h2>Your Sessions</h2>
+      <div id="cart-list">
+        <!-- Cart items will be inserted here -->
+      </div>
+      <div class="total-container">
+        Total: <span class="total-amount" id="total-amount">$0.00</span>
+      </div>
+      <button class="confirm-button" id="confirm-button">Confirm</button>
+      <div class="reservation-info">
+        <p><strong>To reserve your sessions, please follow these steps:</strong></p>
+        <ol>
+          <li>Select classes by clicking the "Select" button on a class card (click again to deselect).</li>
+          <li>Make Payment with Zelle (chadmanning@gmail.com), Venmo (chad-manning-18), Cash, or Check outside of the Fiddle Shack.</li>
+          <li>Note: When four or more classes are selected, each $25 class is discounted to $20 (Bluegrass Jam remains $35).</li>
+          <li>If you have any questions, please contact the Fiddle Shack.</li>
+        </ol>
+      </div>
+    </section>
+  </main>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Retrieve mondayCart from localStorage (default to empty array)
+      let mondayCart = JSON.parse(localStorage.getItem('mondayCart')) || [];
       
-      <li>If you are paying with cash or check please drop me an email, letting me know your class choices</li>
+      const cartListEl = document.getElementById('cart-list');
+      const totalAmountEl = document.getElementById('total-amount');
       
-    </ol>
-  </div>
-</section>
-</main>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Retrieve the Monday sessions cart from localStorage (default to an empty array)
-  let mondayCart = JSON.parse(localStorage.getItem('mondayCart')) || [];
-  
-  const cartListEl = document.getElementById('cart-list');
-  const totalAmountEl = document.getElementById('total-amount');
-  
-  // Function to render the cart with discount logic:
-  // If 4 or more classes are selected, each $25 class is discounted to $20.
-  function renderMondayCart() {
-    cartListEl.innerHTML = '';
-    if (mondayCart.length === 0) {
-      cartListEl.innerHTML = '<p class="empty-message">No classes selected.</p>';
-      totalAmountEl.textContent = '$0.00';
-      return;
-    }
-    let total = 0;
-    mondayCart.forEach(item => {
-      let originalPrice = parseFloat(item.price);
-      let price = originalPrice;
-      let discountNote = '';
-      if (mondayCart.length >= 4 && originalPrice === 25) {
-        price = 20;
-        discountNote = ' (Discount applied)';
+      function renderMondayCart() {
+        cartListEl.innerHTML = '';
+        if (mondayCart.length === 0) {
+          cartListEl.innerHTML = '<p class="empty-message">No classes selected.</p>';
+          totalAmountEl.textContent = '$0.00';
+          return;
+        }
+        let total = 0;
+        mondayCart.forEach(item => {
+          let origPrice = parseFloat(item.price);
+          let price = origPrice;
+          let discountNote = '';
+          if (mondayCart.length >= 4 && origPrice === 25) {
+            price = 20;
+            discountNote = ' (Discount applied)';
+          }
+          total += price;
+          const div = document.createElement('div');
+          div.style.padding = "5px 0";
+          div.style.borderBottom = "1px solid #ddd";
+          div.textContent = `${item.className} @ ${item.time} - $${price.toFixed(2)}${discountNote}`;
+          cartListEl.appendChild(div);
+        });
+        totalAmountEl.textContent = `$${total.toFixed(2)}`;
       }
-      total += price;
-      const div = document.createElement('div');
-      div.style.padding = "5px 0";
-      div.style.borderBottom = "1px solid #ddd";
-      div.textContent = `${item.className} @ ${item.time} - $${price.toFixed(2)}${discountNote}`;
-      cartListEl.appendChild(div);
-    });
-    totalAmountEl.textContent = `$${total.toFixed(2)}`;
-  }
-  
-  renderMondayCart();
-  
-  // Attach event listeners to all "Select" buttons on the individual class cards.
-  const selectButtons = document.querySelectorAll('.select-btn');
-  selectButtons.forEach(button => {
-    button.addEventListener('click', function() {
-      const className = this.getAttribute('data-classname');
-      const time = this.getAttribute('data-time');
-      const price = this.getAttribute('data-price');
-      const selectedClass = { className, time, price };
       
-      // Check if this class is already in the cart.
-      const index = mondayCart.findIndex(item => item.className === className && item.time === time);
-      if (index === -1) {
-        // Add the class.
-        mondayCart.push(selectedClass);
-        this.textContent = "Deselect";
-      } else {
-        // Remove the class.
-        mondayCart.splice(index, 1);
-        this.textContent = "Select";
-      }
-      localStorage.setItem('mondayCart', JSON.stringify(mondayCart));
       renderMondayCart();
+      
+      const selectButtons = document.querySelectorAll('.select-btn');
+      selectButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const className = this.getAttribute('data-classname');
+          const time = this.getAttribute('data-time');
+          const price = this.getAttribute('data-price');
+          const selectedClass = { className, time, price };
+          const index = mondayCart.findIndex(item => item.className === className && item.time === time);
+          if (index === -1) {
+            mondayCart.push(selectedClass);
+            this.textContent = "Deselect";
+          } else {
+            mondayCart.splice(index, 1);
+            this.textContent = "Select";
+          }
+          localStorage.setItem('mondayCart', JSON.stringify(mondayCart));
+          renderMondayCart();
+        });
+      });
+      
+      document.getElementById('confirm-button').addEventListener('click', function() {
+        window.location.href = "/fiddlers-log";
+      });
     });
-  });
-  
-  // When the Confirm button is clicked, redirect to the Fiddler's Log page.
-  document.getElementById('confirm-button').addEventListener('click', function() {
-    window.location.href = "/fiddlers-log";
-  });
-});
-</script>
+  </script>
 </body>
 </html>
