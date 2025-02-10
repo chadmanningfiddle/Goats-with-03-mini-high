@@ -75,14 +75,14 @@ app.get('/private-lessons', (req, res) => {
   res.render('private-lessons', { user: req.session.user });
 });
 
-// Monday Sessions: Cruising page.
-app.get('/monday-sessions-cruising', (req, res) => {
-  res.render('monday-sessions-cruising', { user: req.session.user });
+// Monday Sessions: Relaxed Pace
+app.get('/monday-sessions-relaxed-pace', (req, res) => {
+  res.render('monday-sessions-relaxed-pace', { user: req.session.user });
 });
 
-// Monday Sessions: Comfortable Monday Jams (renamed from monday-sessions-chill).
-app.get('/comfortable-monday-jams', (req, res) => {
-  res.render('comfortable-monday-jams', { user: req.session.user });
+// Monday Sessions: Moving Along
+app.get('/monday-sessions-moving-along', (req, res) => {
+  res.render('monday-sessions-moving-along', { user: req.session.user });
 });
 
 // (Optional) Monday Calendar page.

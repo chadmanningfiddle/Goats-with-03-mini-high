@@ -99,7 +99,7 @@
 <body>
   <header>
     <h1>Monday Sessions: Relaxed Pace</h1>
-    <p class="session-date" style="text-align:center; font-size:1.2em; margin:5px 0;">February 17, 2025</p>
+    <p class="session-date" style="text-align:center; font-size:1.2em; margin:5px 0;">Mon Feb 17 2025</p>
     <nav>
       <a href="/">Home</a>
       <a href="/logout">Logout</a>
@@ -117,7 +117,10 @@
           <li>Cumberland Gap</li>
           <li>Tippin Back the Corn</li>
         </ul>
-        <button class="select-btn" data-classname="Oldtime Morning Groove" data-time="9:00 AM" data-price="25">Select</button>
+        <button class="select-btn" 
+                data-classname="Oldtime Morning Groove" 
+                data-time="9:00 AM" 
+                data-price="25">Select</button>
       </div>
       <!-- Card 2 -->
       <div class="class-card">
@@ -128,7 +131,10 @@
           <li>Goodbye Liza Jane</li>
           <li>Miss Molly</li>
         </ul>
-        <button class="select-btn" data-classname="Twin Fiddles" data-time="10:00 AM" data-price="25">Select</button>
+        <button class="select-btn" 
+                data-classname="Twin Fiddles" 
+                data-time="10:00 AM" 
+                data-price="25">Select</button>
       </div>
       <!-- Card 3 -->
       <div class="class-card">
@@ -139,7 +145,10 @@
           <li>Dinah</li>
           <li>Minor Swing</li>
         </ul>
-        <button class="select-btn" data-classname="Swing Time" data-time="11:00 AM" data-price="25">Select</button>
+        <button class="select-btn" 
+                data-classname="Swing Time" 
+                data-time="11:00 AM" 
+                data-price="25">Select</button>
       </div>
       <!-- Card 4 -->
       <div class="class-card">
@@ -150,7 +159,10 @@
           <li>Soldier's Joy</li>
           <li>Whiskey Before Breakfast</li>
         </ul>
-        <button class="select-btn" data-classname="Bluegrass Instrumentals: The Classics" data-time="12:00 PM" data-price="25">Select</button>
+        <button class="select-btn" 
+                data-classname="Bluegrass Instrumentals: The Classics" 
+                data-time="12:00 PM" 
+                data-price="25">Select</button>
       </div>
       <!-- Card 5 -->
       <div class="class-card">
@@ -159,7 +171,10 @@
         <ul class="tunes-list">
           <li>Selected by musicians</li>
         </ul>
-        <button class="select-btn" data-classname="Bluegrass Jam" data-time="1:00 PM" data-price="35">Select</button>
+        <button class="select-btn" 
+                data-classname="Bluegrass Jam" 
+                data-time="1:00 PM" 
+                data-price="35">Select</button>
       </div>
     </section>
 
@@ -177,28 +192,22 @@
         <p><strong>To reserve your sessions, please follow these steps:</strong></p>
         <ol>
           <li>Select classes by clicking the "Select" button on a class card. (Click again to deselect.)</li>
-          <li>Total cost indicated in cart. Note: When four or more classes are selected, each $25 class is discounted to $20</li>
-
-          <li>MAKE PAYMENT USING ZELLE: chadmanning@gmail.com.  VENMO: chad-manning-18</li> 
-
-          <li>After you've made payment, confirm your lessons and mark them as paid in your Fiddler's Log</li>
-          
-          <li>If you are paying with cash or check please drop me an email, letting me know your class choices</li>
-          
+          <li>Make Payment with Zelle (chadmanning@gmail.com), Venmo (chad-manning-18), Cash, or Check outside of the Fiddle Shack.</li>
+          <li>The total displayed is the amount due for the lessons you have selected. Note: When four or more classes are selected, each $25 class is discounted to $20 (Bluegrass Jam remains $35).</li>
+          <li>If you have any questions, please contact the Fiddle Shack.</li>
         </ol>
       </div>
     </section>
   </main>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Retrieve the Monday sessions cart from localStorage (default to an empty array)
+      // Retrieve the Monday sessions cart from localStorage; default to an empty array.
       let mondayCart = JSON.parse(localStorage.getItem('mondayCart')) || [];
       
       const cartListEl = document.getElementById('cart-list');
       const totalAmountEl = document.getElementById('total-amount');
       
-      // Function to render the cart with discount logic:
-      // If 4 or more classes are selected, each $25 class is discounted to $20.
+      // Function to render the cart with discount logic.
       function renderMondayCart() {
         cartListEl.innerHTML = '';
         if (mondayCart.length === 0) {
@@ -208,10 +217,10 @@
         }
         let total = 0;
         mondayCart.forEach(item => {
-          let originalPrice = parseFloat(item.price);
-          let price = originalPrice;
+          let origPrice = parseFloat(item.price);
+          let price = origPrice;
           let discountNote = '';
-          if (mondayCart.length >= 4 && originalPrice === 25) {
+          if (mondayCart.length >= 4 && origPrice === 25) {
             price = 20;
             discountNote = ' (Discount applied)';
           }
@@ -227,7 +236,7 @@
       
       renderMondayCart();
       
-      // Attach event listeners to all "Select" buttons on the individual class cards.
+      // Attach event listeners to "Select" buttons (toggle selection).
       const selectButtons = document.querySelectorAll('.select-btn');
       selectButtons.forEach(button => {
         button.addEventListener('click', function() {
@@ -236,14 +245,11 @@
           const price = this.getAttribute('data-price');
           const selectedClass = { className, time, price };
           
-          // Check if this class is already in the cart.
           const index = mondayCart.findIndex(item => item.className === className && item.time === time);
           if (index === -1) {
-            // Add the class.
             mondayCart.push(selectedClass);
             this.textContent = "Deselect";
           } else {
-            // Remove the class.
             mondayCart.splice(index, 1);
             this.textContent = "Select";
           }
@@ -252,7 +258,7 @@
         });
       });
       
-      // When the Confirm button is clicked, redirect to the Fiddler's Log page.
+      // Confirm button: redirect to the Fiddler's Log page.
       document.getElementById('confirm-button').addEventListener('click', function() {
         window.location.href = "/fiddlers-log";
       });

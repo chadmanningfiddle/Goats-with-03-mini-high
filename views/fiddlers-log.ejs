@@ -3,16 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Fiddler's Log - Monday Sessions</title>
+  <title>Fiddler's Log - Private Lessons</title>
   <link rel="stylesheet" href="/style.css">
   <style>
-    .monday-card {
+    /* Fiddler's Log Page Styles */
+    body {
+      background-color: #fefefe;
+      font-family: Arial, sans-serif;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #8B4513;
+      color: #fff;
+      padding: 10px;
+      text-align: center;
+    }
+    nav a {
+      color: #fff;
+      margin: 0 10px;
+      text-decoration: none;
+    }
+    main {
       max-width: 800px;
       margin: 20px auto;
-      padding: 20px;
+      padding: 10px;
+    }
+    .monday-card {
       border: 2px solid #8B4513;
       border-radius: 10px;
       background-color: #fff8dc;
+      padding: 20px;
+      margin-bottom: 20px;
     }
     .monday-card h2 {
       color: #8B4513;
@@ -38,9 +61,16 @@
       text-align: center;
       padding: 15px;
       border-radius: 5px;
-      margin-top: 20px;
-      font-size: 2em;
+      margin-top: 10px;
+      font-size: 1.8em;
       color: #8B4513;
+    }
+    .overall-total {
+      text-align: center;
+      font-size: 2.5em;
+      font-weight: bold;
+      color: #8B4513;
+      margin-top: 20px;
     }
     .empty-message {
       text-align: center;
@@ -59,48 +89,74 @@
     </nav>
   </header>
   <main>
-    <div class="monday-card">
-      <h2>Monday Sessions</h2>
-      <div id="monday-card-content">
-        <!-- Monday session items will be rendered here -->
-      </div>
-      <div class="total-container">
-        Total: <span id="monday-total">$0.00</span>
-      </div>
+    <div id="lessons-container">
+      <!-- Monday cards (grouped by date) will be rendered here -->
+    </div>
+    <div class="overall-total" id="overall-total">
+      Overall Total: $0.00
     </div>
   </main>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Retrieve Monday sessions from localStorage (from the mondayCart key).
-      // This page does not pre-populate sample data.
-      let mondayCart = JSON.parse(localStorage.getItem('mondayCart')) || [];
+      // Retrieve the private lessons cart from localStorage.
+      let lessons = JSON.parse(localStorage.getItem('privateLessonsCart')) || [];
       
-      const mondayCardContent = document.getElementById('monday-card-content');
-      const mondayTotalEl = document.getElementById('monday-total');
+      const lessonsContainer = document.getElementById('lessons-container');
+      const overallTotalEl = document.getElementById('overall-total');
       
+      // Group lessons by date (using the lesson.date property).
+      function groupByDate(lessons) {
+        const groups = {};
+        lessons.forEach(lesson => {
+          const dateStr = new Date(lesson.date).toDateString();
+          if (!groups[dateStr]) {
+            groups[dateStr] = [];
+          }
+          groups[dateStr].push(lesson);
+        });
+        return groups;
+      }
+      
+      // Render Monday cards grouped by date.
       function renderMondayCard() {
-        mondayCardContent.innerHTML = '';
-        if (mondayCart.length === 0) {
-          mondayCardContent.innerHTML = '<p class="empty-message">No sessions booked for Monday.</p>';
-          mondayTotalEl.textContent = '$0.00';
+        lessonsContainer.innerHTML = '';
+        if (lessons.length === 0) {
+          lessonsContainer.innerHTML = '<p class="empty-message">No private lessons booked yet.</p>';
+          overallTotalEl.textContent = 'Overall Total: $0.00';
           return;
         }
-        let total = 0;
-        mondayCart.forEach(item => {
-          let originalPrice = parseFloat(item.price);
-          let price = originalPrice;
-          if (mondayCart.length >= 4 && originalPrice === 25) {
-            price = 20;
-          }
-          total += price;
-          // For payment status, assume a "paid" property (default false if not set)
-          let paidStatus = item.paid ? 'Paid' : 'Not Paid';
-          const div = document.createElement('div');
-          div.classList.add('session-item');
-          div.innerHTML = `${item.className} @ ${item.time} - $${price.toFixed(2)} <span class="status">${paidStatus}</span>`;
-          mondayCardContent.appendChild(div);
+        
+        const groups = groupByDate(lessons);
+        let overallTotal = 0;
+        
+        Object.keys(groups).forEach(dateStr => {
+          const group = groups[dateStr];
+          let groupTotal = 0;
+          let cardHTML = '<div class="monday-card">';
+          cardHTML += `<h2>${dateStr}</h2>`;
+          
+          group.forEach(lesson => {
+            let origPrice = parseFloat(lesson.price);
+            let price = origPrice;
+            // Apply discount: if 4 or more lessons on that day and lesson costs $25, discount to $20.
+            if (group.length >= 4 && origPrice === 25) {
+              price = 20;
+            }
+            groupTotal += price;
+            let status = lesson.paid ? 'Paid' : 'Not Paid';
+            cardHTML += `<div class="session-item">
+                           ${lesson.className} @ ${lesson.time} - $${price.toFixed(2)}
+                           <span class="status">${status}</span>
+                         </div>`;
+          });
+          cardHTML += `<div class="total-container">Group Total: $${groupTotal.toFixed(2)}</div>`;
+          cardHTML += '</div>';
+          
+          lessonsContainer.innerHTML += cardHTML;
+          overallTotal += groupTotal;
         });
-        mondayTotalEl.textContent = `$${total.toFixed(2)}`;
+        
+        overallTotalEl.textContent = 'Overall Total: $' + overallTotal.toFixed(2);
       }
       
       renderMondayCard();
