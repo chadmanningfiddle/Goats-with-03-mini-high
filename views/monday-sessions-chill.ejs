@@ -6,7 +6,7 @@
   <title>Monday Sessions: Chill</title>
   <link rel="stylesheet" href="/style.css" />
   <style>
-    /* Styles for individual class cards (if not already in your style.css) */
+    /* Styles for individual class cards */
     .class-schedule {
       display: flex;
       flex-wrap: wrap;
@@ -52,6 +52,12 @@
       border: 2px solid #8B4513;
       border-radius: 10px;
       background-color: #fff8dc;
+    }
+    .empty-message {
+      text-align: center;
+      font-style: italic;
+      color: #777;
+      margin: 10px 0;
     }
     .total-container {
       margin-top: 20px;
@@ -151,7 +157,7 @@
       </div>
     </section>
 
-    <!-- NEW CART SECTION -->
+    <!-- NEW CART SECTION: Displays only classes the user has selected -->
     <section class="cart">
       <h2>Your Classes</h2>
       <div id="cart-list">
@@ -166,7 +172,7 @@
         <ol>
           <li>Select classes.</li>
           <li>Make Payment with Zelle (chadmanning@gmail.com), Venmo (chad-manning-18), Cash, or Check outside of the Fiddle Shack.</li>
-          <li>The total displayed is the amount due for the lessons booked in the current month.</li>
+          <li>The total displayed is the amount due for the lessons you have selected.</li>
           <li>If you have any questions, please contact the Fiddle Shack.</li>
         </ol>
       </div>
@@ -174,24 +180,20 @@
   </main>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Load Monday sessions (the cart data) from localStorage under "mondayCart"
-      let mondayCart = JSON.parse(localStorage.getItem('mondayCart'));
-      if (!mondayCart || mondayCart.length === 0) {
-        mondayCart = [
-          { className: "Old-Time Morning Fiddle Groove", time: "8:00 AM", price: 95 },
-          { className: "Twin Fiddles", time: "9:00 AM", price: 95 },
-          { className: "Swing Time", time: "10:00 AM", price: 95 },
-          { className: "Bluegrass Instrumentals: The Classics", time: "11:00 AM", price: 95 },
-          { className: "Bluegrass Jam", time: "1:00 PM", price: 35 }
-        ];
-        localStorage.setItem('mondayCart', JSON.stringify(mondayCart));
-      }
-      
+      // Load Monday sessions cart from localStorage. Do not pre-populate sample data.
+      // If nothing exists, mondayCart will be an empty array.
+      let mondayCart = JSON.parse(localStorage.getItem('mondayCart')) || [];
+
       const cartListEl = document.getElementById('cart-list');
       const totalAmountEl = document.getElementById('total-amount');
       
       function renderMondayCart() {
         cartListEl.innerHTML = '';
+        if (mondayCart.length === 0) {
+          cartListEl.innerHTML = '<p class="empty-message">No classes selected.</p>';
+          totalAmountEl.textContent = '$0.00';
+          return;
+        }
         let total = 0;
         mondayCart.forEach(item => {
           total += item.price;
