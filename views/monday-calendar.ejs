@@ -75,7 +75,7 @@
         "Oldtime Morning Groove",
         "Twin Fiddles",
         "Swing Time",
-        "Bluegrass Instrumentals: The Classics",
+        "Bluegrass Instrumentals",
         "Bluegrass Jam"
       ];
       
@@ -116,7 +116,7 @@
             calendarHTML += `<td class="${cellClass}" data-date="${date}" data-month="${month}" data-year="${year}">${date}`;
             // If it's a Monday cell, list the class titles.
             if (cellClass === 'monday') {
-              calendarHTML += `<div class="monday-classes"><ul>`;
+              calendarHTML += `<div class="monday-sessions"><ul>`;
               mondayClasses.forEach(cls => {
                 calendarHTML += `<li>${cls}</li>`;
               });
@@ -140,9 +140,9 @@
           const day = parseInt(this.getAttribute('data-date'));
           // Using an even/odd rule: even day -> cruising; odd day -> chill.
           if (day % 2 === 0) {
-            window.location.href = "/monday-sessions-cruising";
+            window.location.href = "/monday-sessions-moving-along";
           } else {
-            window.location.href = "/monday-sessions-chill";
+            window.location.href = "/monday-sessions-relaxed-pace";
           }
         });
       });
