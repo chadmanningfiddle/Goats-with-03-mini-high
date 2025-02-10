@@ -70,7 +70,7 @@
     </nav>
   </header>
   <main>
-    <!-- Card for Monday Sessions -->
+    <!-- Session card that groups all Monday classes -->
     <div class="session-card">
       <h2>Available Lessons for Monday</h2>
       <ul class="class-list" id="class-list">
@@ -84,12 +84,11 @@
   </main>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // For this demo, we assume Monday sessions are stored in localStorage under "mondayCart"
-      // In a real app, you'd get this data from the server.
-      let mondayCart = JSON.parse(localStorage.getItem('mondayCart')) || [];
+      // Try to load Monday sessions from localStorage under "mondayCart".
+      // If not present or empty, use sample data.
+      let mondayCart = JSON.parse(localStorage.getItem('mondayCart'));
       
-      // If there are no Monday classes booked yet, insert some sample data.
-      if (mondayCart.length === 0) {
+      if (!mondayCart || mondayCart.length === 0) {
         mondayCart = [
           { className: "Old-Time Morning Fiddle Groove", time: "8:00 AM", price: 95 },
           { className: "Twin Fiddles", time: "9:00 AM", price: 95 },
@@ -97,6 +96,9 @@
         ];
         localStorage.setItem('mondayCart', JSON.stringify(mondayCart));
       }
+      
+      // Log for debugging purposes.
+      console.log("Monday Cart Data:", mondayCart);
       
       const classListEl = document.getElementById('class-list');
       const totalAmountEl = document.getElementById('total-amount');
@@ -115,7 +117,7 @@
       
       renderMondayCart();
       
-      // When Confirm button is clicked, redirect to Fiddler's Log page
+      // Confirm button: when clicked, redirect to the Fiddler's Log page.
       document.getElementById('confirm-button').addEventListener('click', function() {
         window.location.href = "/fiddlers-log";
       });
