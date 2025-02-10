@@ -84,7 +84,7 @@
       const month = today.getMonth();
       const year = today.getFullYear();
       
-      // Get the first day of the month and number of days.
+      // Get the first day of the month and the number of days.
       const firstDay = new Date(year, month, 1);
       const daysInMonth = new Date(year, month + 1, 0).getDate();
       
@@ -116,7 +116,7 @@
             calendarHTML += `<td class="${cellClass}" data-date="${date}" data-month="${month}" data-year="${year}">${date}`;
             // If it's a Monday cell, list the class titles.
             if (cellClass === 'monday') {
-              calendarHTML += `<div class="monday-sessions"><ul>`;
+              calendarHTML += `<div class="monday-classes"><ul>`;
               mondayClasses.forEach(cls => {
                 calendarHTML += `<li>${cls}</li>`;
               });
@@ -138,7 +138,7 @@
         cell.addEventListener('click', function() {
           // Get the day number from the clicked cell.
           const day = parseInt(this.getAttribute('data-date'));
-          // Using an even/odd rule: even day -> cruising; odd day -> chill.
+          // Using an even/odd rule: even day -> moving along; odd day -> relaxed pace.
           if (day % 2 === 0) {
             window.location.href = "/monday-sessions-moving-along";
           } else {

@@ -18,7 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Set up session middleware.
 app.use(session({
-  secret: 'your-secret-key', // Replace with your own secret in production.
+  secret: 'your-secret-key', // Replace with a strong secret in production.
   resave: false,
   saveUninitialized: false
 }));
@@ -38,7 +38,7 @@ app.get('/login', (req, res) => {
 // Process login.
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
-  // Dummy authentication – replace with your real logic.
+  // Dummy authentication – replace with real logic.
   if (username === 'admin' && password === 'password') {
     req.session.user = { username };
     res.redirect('/');
@@ -64,7 +64,7 @@ app.post('/signup', (req, res) => {
   if (password !== confirmPassword) {
     return res.render('signup', { error: 'Passwords do not match' });
   }
-  // Here you would normally store the new user in your database.
+  // Normally store the new user in your database.
   req.session.user = { username };
   res.redirect('/');
 });
@@ -85,7 +85,7 @@ app.get('/monday-sessions-moving-along', (req, res) => {
   res.render('monday-sessions-moving-along', { user: req.session.user });
 });
 
-// (Optional) Monday Calendar page.
+// Monday Calendar page.
 app.get('/monday-calendar', (req, res) => {
   res.render('monday-calendar', { user: req.session.user });
 });
