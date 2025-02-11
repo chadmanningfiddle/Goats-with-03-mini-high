@@ -6,7 +6,7 @@
   <title>Fiddler's Log</title>
   <link rel="stylesheet" href="/style.css">
   <style>
-    /* Import Cochran font – ensure you have these files in your /fonts/ folder */
+    /* Import Cochran font – ensure these files are available in /fonts/ */
     @font-face {
       font-family: 'Cochran';
       src: url('/fonts/Cochran.woff2') format('woff2'),
@@ -28,7 +28,7 @@
     .log-entry {
       position: relative;
       background-color: white;
-      padding: 15px 15px 15px 40px;  /* leave space for a checkbox */
+      padding: 15px 15px 15px 50px; /* leave space for checkbox */
       margin-bottom: 15px;
       border-radius: 5px;
       border: 1px solid #8B4513;
@@ -72,6 +72,7 @@
     .filter-controls {
       margin-bottom: 20px;
       display: flex;
+      align-items: center;
       gap: 10px;
       flex-wrap: wrap;
     }
@@ -80,7 +81,11 @@
       border: 1px solid #8B4513;
       border-radius: 3px;
     }
-    /* Style for the master cancel button */
+    .select-all-container {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
     .master-cancel {
       background-color: #cc0000;
       color: white;
@@ -93,7 +98,7 @@
     .master-cancel:hover {
       background-color: #e60000;
     }
-    /* Checkbox styling */
+    /* Checkbox styling for individual lessons */
     .select-lesson {
       position: absolute;
       top: 15px;
@@ -103,7 +108,19 @@
   </style>
 </head>
 <body>
-  <!-- (Access control and logout scripts omitted here; assume they are in place as before) -->
+  <!-- Access control script (assumed already in place) -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (!localStorage.getItem('isLoggedIn')) {
+        window.location.href = '/login';
+      }
+    });
+    function logout() {
+      localStorage.removeItem('isLoggedIn');
+      window.location.href = '/login';
+    }
+  </script>
+
   <header>
     <h1>Fiddler's Log</h1>
     <nav>
@@ -127,14 +144,17 @@
           <option value="future">Future Lessons</option>
           <option value="past">Past Lessons</option>
         </select>
+        <!-- Traditional select-all checkbox -->
+        <div class="select-all-container">
+          <input type="checkbox" id="selectAll" />
+          <label for="selectAll">Select All</label>
+        </div>
       </div>
-      <!-- Master button to cancel selected lessons -->
+      <!-- Master cancel button -->
       <button class="master-cancel" onclick="cancelSelectedLessons()">Cancel Selected Lessons</button>
-
       <div id="log-entries">
-        <!-- Log entries will be dynamically inserted here -->
+        <!-- Lesson entries will be inserted here -->
       </div>
-
       <div class="log-entry">
         <h3>Add New Practice Notes</h3>
         <textarea id="new-practice-notes" class="practice-input" placeholder="Enter your practice notes here..."></textarea>
@@ -146,7 +166,7 @@
   </main>
 
   <script>
-    // Helper: add ordinal suffix
+    // Helper to add ordinal suffix (st, nd, rd, th)
     function getOrdinal(n) {
       const s = ["th", "st", "nd", "rd"],
             v = n % 100;
@@ -160,7 +180,7 @@
       const time = date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
       return `${weekday} ${month} ${day} at ${time}`;
     }
-    // Create log entries from an array of lessons (adding a checkbox for multi-select)
+    // Create lesson entries from an array of lessons with individual checkboxes
     function createLogEntriesForClasses(lessons, type) {
       const logEntries = document.getElementById('log-entries');
       lessons.forEach(lesson => {
@@ -186,23 +206,26 @@
       });
       saveLogs();
     }
-    // Load and save logs to localStorage
+    // Load saved log entries from localStorage
     function loadLogs() {
       const savedLogs = localStorage.getItem('fiddlerLogs');
       if (savedLogs) {
         document.getElementById('log-entries').innerHTML = savedLogs;
       }
     }
+    // Save log entries to localStorage
     function saveLogs() {
       const logEntries = document.getElementById('log-entries').innerHTML;
       localStorage.setItem('fiddlerLogs', logEntries);
     }
+    // Save/update notes for a log entry
     function saveNotes(button) {
       const entry = button.closest('.log-entry');
       entry.querySelector('h3').textContent += " (Last updated: " + new Date().toLocaleTimeString() + ")";
       saveLogs();
       alert('Notes saved successfully!');
     }
+    // Save new practice notes and add a new entry
     function savePracticeNotes() {
       const notes = document.getElementById('new-practice-notes').value;
       if (!notes.trim()) {
@@ -231,6 +254,7 @@
       saveLogs();
       alert('Practice notes saved successfully!');
     }
+    // Delete (cancel) an individual lesson entry
     function deleteEntry(button) {
       if (confirm('Are you sure you want to cancel this lesson?')) {
         const entry = button.closest('.log-entry');
@@ -238,7 +262,7 @@
         saveLogs();
       }
     }
-    // Cancel all selected lessons at once
+    // Cancel (delete) all selected lessons
     function cancelSelectedLessons() {
       const checkboxes = document.querySelectorAll('.select-lesson');
       let anySelected = false;
@@ -256,7 +280,15 @@
         alert("Selected lessons canceled.");
       }
     }
-    // Filter log entries based on controls
+    // Toggle select all functionality
+    document.getElementById('selectAll').addEventListener('change', function() {
+      const checked = this.checked;
+      const checkboxes = document.querySelectorAll('.select-lesson');
+      checkboxes.forEach(chk => {
+        chk.checked = checked;
+      });
+    });
+    // Filtering functionality remains unchanged
     function filterLogs() {
       const classFilter = document.getElementById('class-filter').value;
       const dateFilter = document.getElementById('date-filter').value;
