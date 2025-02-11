@@ -108,7 +108,7 @@
   </style>
 </head>
 <body>
-  <!-- Access control script (assumed already in place) -->
+  <!-- Access control script -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       if (!localStorage.getItem('isLoggedIn')) {
@@ -144,17 +144,19 @@
           <option value="future">Future Lessons</option>
           <option value="past">Past Lessons</option>
         </select>
-        <!-- Traditional select-all checkbox -->
+        <!-- Select All Checkbox (if you use multi-select) -->
         <div class="select-all-container">
           <input type="checkbox" id="selectAll" />
           <label for="selectAll">Select All</label>
         </div>
       </div>
-      <!-- Master cancel button -->
+      <!-- Master cancel button for multi-select cancellation -->
       <button class="master-cancel" onclick="cancelSelectedLessons()">Cancel Selected Lessons</button>
+
       <div id="log-entries">
-        <!-- Lesson entries will be inserted here -->
+        <!-- No prepopulated lessons loaded; only user-added entries will appear -->
       </div>
+
       <div class="log-entry">
         <h3>Add New Practice Notes</h3>
         <textarea id="new-practice-notes" class="practice-input" placeholder="Enter your practice notes here..."></textarea>
@@ -166,12 +168,13 @@
   </main>
 
   <script>
-    // Helper to add ordinal suffix (st, nd, rd, th)
+    // Helper function to add ordinal suffixes to a number
     function getOrdinal(n) {
       const s = ["th", "st", "nd", "rd"],
             v = n % 100;
       return n + (s[(v - 20) % 10] || s[v] || s[0]);
     }
+    
     // Format date/time as "Thursday February 20th at 12:00 PM"
     function formatDateTime(date) {
       const weekday = date.toLocaleDateString(undefined, { weekday: 'long' });
@@ -180,52 +183,33 @@
       const time = date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
       return `${weekday} ${month} ${day} at ${time}`;
     }
-    // Create lesson entries from an array of lessons with individual checkboxes
-    function createLogEntriesForClasses(lessons, type) {
-      const logEntries = document.getElementById('log-entries');
-      lessons.forEach(lesson => {
-        const entryDiv = document.createElement('div');
-        entryDiv.className = 'log-entry';
-        entryDiv.dataset.type = type;
-        const lessonDate = lesson.date ? new Date(lesson.date) : new Date();
-        entryDiv.dataset.date = lessonDate.toISOString();
-        const headerText = (lesson.className || lesson.time || (type === 'private' ? 'Private Lesson' : 'Session'))
-                           + " - " + formatDateTime(lessonDate);
-        entryDiv.innerHTML = `
-          <input type="checkbox" class="select-lesson" />
-          <h3>${headerText}</h3>
-          <div class="practice-notes">
-            <textarea class="practice-input" placeholder="Enter your notes..."></textarea>
-            <div class="button-group">
-              <button onclick="saveNotes(this)">Save Notes</button>
-              <button onclick="deleteEntry(this)">Cancel Lesson</button>
-            </div>
-          </div>
-        `;
-        logEntries.insertBefore(entryDiv, logEntries.firstChild);
-      });
-      saveLogs();
-    }
-    // Load saved log entries from localStorage
+    
+    // (Optional) Function to create log entries from lessons if needed later
+    // function createLogEntriesForClasses(lessons, type) { ... }
+
+    // Load saved log entries from localStorage (if any)
     function loadLogs() {
       const savedLogs = localStorage.getItem('fiddlerLogs');
       if (savedLogs) {
         document.getElementById('log-entries').innerHTML = savedLogs;
       }
     }
+    
     // Save log entries to localStorage
     function saveLogs() {
       const logEntries = document.getElementById('log-entries').innerHTML;
       localStorage.setItem('fiddlerLogs', logEntries);
     }
-    // Save/update notes for a log entry
+    
+    // Save notes for a specific log entry
     function saveNotes(button) {
       const entry = button.closest('.log-entry');
       entry.querySelector('h3').textContent += " (Last updated: " + new Date().toLocaleTimeString() + ")";
       saveLogs();
       alert('Notes saved successfully!');
     }
-    // Save new practice notes and add a new entry
+    
+    // Save new practice notes and add as a new entry
     function savePracticeNotes() {
       const notes = document.getElementById('new-practice-notes').value;
       if (!notes.trim()) {
@@ -254,7 +238,8 @@
       saveLogs();
       alert('Practice notes saved successfully!');
     }
-    // Delete (cancel) an individual lesson entry
+    
+    // Delete (cancel) an individual log entry
     function deleteEntry(button) {
       if (confirm('Are you sure you want to cancel this lesson?')) {
         const entry = button.closest('.log-entry');
@@ -262,7 +247,8 @@
         saveLogs();
       }
     }
-    // Cancel (delete) all selected lessons
+    
+    // Cancel selected lessons using checkboxes
     function cancelSelectedLessons() {
       const checkboxes = document.querySelectorAll('.select-lesson');
       let anySelected = false;
@@ -280,7 +266,8 @@
         alert("Selected lessons canceled.");
       }
     }
-    // Toggle select all functionality
+    
+    // Select all functionality for checkboxes
     document.getElementById('selectAll').addEventListener('change', function() {
       const checked = this.checked;
       const checkboxes = document.querySelectorAll('.select-lesson');
@@ -288,43 +275,16 @@
         chk.checked = checked;
       });
     });
-    // Filtering functionality remains unchanged
-    function filterLogs() {
-      const classFilter = document.getElementById('class-filter').value;
-      const dateFilter = document.getElementById('date-filter').value;
-      const entries = document.querySelectorAll('.log-entry');
-      const now = new Date();
-      entries.forEach(entry => {
-        let showEntry = true;
-        if (classFilter !== 'all') {
-          showEntry = entry.dataset.type === classFilter;
-        }
-        if (showEntry && dateFilter !== 'all') {
-          const entryDate = new Date(entry.dataset.date);
-          if (dateFilter === 'future') {
-            showEntry = entryDate >= now;
-          } else if (dateFilter === 'past') {
-            showEntry = entryDate < now;
-          }
-        }
-        entry.style.display = showEntry ? 'block' : 'none';
-      });
-    }
+    
     document.addEventListener('DOMContentLoaded', function() {
       console.log("Fiddler's Log DOM fully loaded");
       loadLogs();
-      document.getElementById('class-filter').addEventListener('change', filterLogs);
-      document.getElementById('date-filter').addEventListener('change', filterLogs);
-      
-      // Load additional lessons if stored
-      const mondayCart = JSON.parse(localStorage.getItem('mondayCart')) || [];
-      if (mondayCart.length > 0) {
-        createLogEntriesForClasses(mondayCart, 'monday');
-      }
-      const privateLessons = JSON.parse(localStorage.getItem('privateLessons')) || [];
-      if (privateLessons.length > 0) {
-        createLogEntriesForClasses(privateLessons, 'private');
-      }
+      document.getElementById('class-filter').addEventListener('change', function() {
+        // Implement filtering if needed
+      });
+      document.getElementById('date-filter').addEventListener('change', function() {
+        // Implement filtering if needed
+      });
     });
   </script>
 </body>
