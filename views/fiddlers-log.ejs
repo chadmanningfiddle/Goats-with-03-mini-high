@@ -28,7 +28,7 @@
     .log-entry {
       position: relative;
       background-color: white;
-      padding: 15px 15px 15px 50px; /* leave space for checkbox */
+      padding: 15px 15px 15px 50px; /* leave space for the checkbox */
       margin-bottom: 15px;
       border-radius: 5px;
       border: 1px solid #8B4513;
@@ -98,7 +98,7 @@
     .master-cancel:hover {
       background-color: #e60000;
     }
-    /* Checkbox styling for individual lessons */
+    /* Style for individual lesson checkboxes */
     .select-lesson {
       position: absolute;
       top: 15px;
@@ -108,7 +108,7 @@
   </style>
 </head>
 <body>
-  <!-- Access control script -->
+  <!-- Access control: redirect to login if not signed in -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       if (!localStorage.getItem('isLoggedIn')) {
@@ -120,7 +120,6 @@
       window.location.href = '/login';
     }
   </script>
-
   <header>
     <h1>Fiddler's Log</h1>
     <nav>
@@ -130,7 +129,6 @@
       <a href="#" onclick="logout()">Logout</a>
     </nav>
   </header>
-
   <main>
     <div class="log-container">
       <div class="filter-controls">
@@ -144,19 +142,16 @@
           <option value="future">Future Lessons</option>
           <option value="past">Past Lessons</option>
         </select>
-        <!-- Select All Checkbox (if you use multi-select) -->
         <div class="select-all-container">
           <input type="checkbox" id="selectAll" />
           <label for="selectAll">Select All</label>
         </div>
       </div>
-      <!-- Master cancel button for multi-select cancellation -->
+      <!-- Master cancel button -->
       <button class="master-cancel" onclick="cancelSelectedLessons()">Cancel Selected Lessons</button>
-
       <div id="log-entries">
-        <!-- No prepopulated lessons loaded; only user-added entries will appear -->
+        <!-- Only lessons added by the client (saved in localStorage) will appear here -->
       </div>
-
       <div class="log-entry">
         <h3>Add New Practice Notes</h3>
         <textarea id="new-practice-notes" class="practice-input" placeholder="Enter your practice notes here..."></textarea>
@@ -166,16 +161,14 @@
       </div>
     </div>
   </main>
-
   <script>
-    // Helper function to add ordinal suffixes to a number
+    // Helper function: add ordinal suffix (st, nd, rd, th)
     function getOrdinal(n) {
       const s = ["th", "st", "nd", "rd"],
             v = n % 100;
       return n + (s[(v - 20) % 10] || s[v] || s[0]);
     }
-    
-    // Format date/time as "Thursday February 20th at 12:00 PM"
+    // Format a Date object into "Thursday February 20th at 12:00 PM"
     function formatDateTime(date) {
       const weekday = date.toLocaleDateString(undefined, { weekday: 'long' });
       const month = date.toLocaleDateString(undefined, { month: 'long' });
@@ -183,33 +176,26 @@
       const time = date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
       return `${weekday} ${month} ${day} at ${time}`;
     }
-    
-    // (Optional) Function to create log entries from lessons if needed later
-    // function createLogEntriesForClasses(lessons, type) { ... }
-
-    // Load saved log entries from localStorage (if any)
+    // Load saved lessons from localStorage (only lessons added by the client)
     function loadLogs() {
       const savedLogs = localStorage.getItem('fiddlerLogs');
       if (savedLogs) {
         document.getElementById('log-entries').innerHTML = savedLogs;
       }
     }
-    
-    // Save log entries to localStorage
+    // Save the current lesson entries to localStorage
     function saveLogs() {
       const logEntries = document.getElementById('log-entries').innerHTML;
       localStorage.setItem('fiddlerLogs', logEntries);
     }
-    
-    // Save notes for a specific log entry
+    // Save/update notes for an individual lesson entry
     function saveNotes(button) {
       const entry = button.closest('.log-entry');
       entry.querySelector('h3').textContent += " (Last updated: " + new Date().toLocaleTimeString() + ")";
       saveLogs();
       alert('Notes saved successfully!');
     }
-    
-    // Save new practice notes and add as a new entry
+    // Save new practice notes and add a new lesson entry (with current date/time)
     function savePracticeNotes() {
       const notes = document.getElementById('new-practice-notes').value;
       if (!notes.trim()) {
@@ -238,8 +224,7 @@
       saveLogs();
       alert('Practice notes saved successfully!');
     }
-    
-    // Delete (cancel) an individual log entry
+    // Delete (cancel) an individual lesson entry
     function deleteEntry(button) {
       if (confirm('Are you sure you want to cancel this lesson?')) {
         const entry = button.closest('.log-entry');
@@ -247,8 +232,7 @@
         saveLogs();
       }
     }
-    
-    // Cancel selected lessons using checkboxes
+    // Cancel all selected lessons using their checkboxes
     function cancelSelectedLessons() {
       const checkboxes = document.querySelectorAll('.select-lesson');
       let anySelected = false;
@@ -266,8 +250,7 @@
         alert("Selected lessons canceled.");
       }
     }
-    
-    // Select all functionality for checkboxes
+    // "Select All" checkbox functionality
     document.getElementById('selectAll').addEventListener('change', function() {
       const checked = this.checked;
       const checkboxes = document.querySelectorAll('.select-lesson');
@@ -275,16 +258,29 @@
         chk.checked = checked;
       });
     });
-    
+    // Filtering functionality: show all, future, or past lessons
+    function filterLogs() {
+      const dateFilter = document.getElementById('date-filter').value;
+      const entries = document.querySelectorAll('.log-entry');
+      const now = new Date();
+      entries.forEach(entry => {
+        let showEntry = true;
+        if (dateFilter !== 'all') {
+          const entryDate = new Date(entry.dataset.date);
+          if (dateFilter === 'future') {
+            showEntry = entryDate >= now;
+          } else if (dateFilter === 'past') {
+            showEntry = entryDate < now;
+          }
+        }
+        entry.style.display = showEntry ? 'block' : 'none';
+      });
+    }
+    // Set up filter event listener
+    document.getElementById('date-filter').addEventListener('change', filterLogs);
     document.addEventListener('DOMContentLoaded', function() {
       console.log("Fiddler's Log DOM fully loaded");
       loadLogs();
-      document.getElementById('class-filter').addEventListener('change', function() {
-        // Implement filtering if needed
-      });
-      document.getElementById('date-filter').addEventListener('change', function() {
-        // Implement filtering if needed
-      });
     });
   </script>
 </body>
