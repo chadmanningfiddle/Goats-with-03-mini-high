@@ -6,7 +6,7 @@
   <title>Fiddler's Log</title>
   <link rel="stylesheet" href="/style.css">
   <style>
-    /* Import Cochran font – ensure you have these font files in your fonts folder */
+    /* Import Cochran font – ensure you have these files available */
     @font-face {
       font-family: 'Cochran';
       src: url('/fonts/Cochran.woff2') format('woff2'),
@@ -82,13 +82,29 @@
   </style>
 </head>
 <body>
+  <!-- Check if user is logged in; if not, redirect -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (!localStorage.getItem('isLoggedIn')) {
+        window.location.href = '/login';
+      }
+    });
+    
+    // Logout function to clear the login flag and redirect
+    function logout() {
+      localStorage.removeItem('isLoggedIn');
+      window.location.href = '/login';
+    }
+  </script>
+
   <header>
     <h1>Fiddler's Log</h1>
     <nav>
       <a href="/">Home</a>
       <a href="/monday-sessions-relaxed-pace">Monday Sessions</a>
       <a href="/private-lessons">Private Lessons</a>
-      <a href="/logout">Logout</a>
+      <!-- Updated logout link to call logout() -->
+      <a href="#" onclick="logout()">Logout</a>
     </nav>
   </header>
 
@@ -100,7 +116,7 @@
           <option value="private">Private Lessons</option>
           <option value="monday">Monday Sessions</option>
         </select>
-        <!-- Updated filter options -->
+        <!-- Updated date filter options -->
         <select id="date-filter">
           <option value="all">All</option>
           <option value="future">Future Lessons</option>
@@ -123,14 +139,14 @@
   </main>
 
   <script>
-    // Helper function to add ordinal suffixes to dates
+    // Helper function to add ordinal suffixes to numbers
     function getOrdinal(n) {
       const s = ["th", "st", "nd", "rd"],
             v = n % 100;
       return n + (s[(v - 20) % 10] || s[v] || s[0]);
     }
     
-    // Format the date and time as "Thursday February 20th at 12:00 PM"
+    // Format the date/time as "Thursday February 20th at 12:00 PM"
     function formatDateTime(date) {
       const weekday = date.toLocaleDateString(undefined, { weekday: 'long' });
       const month = date.toLocaleDateString(undefined, { month: 'long' });
@@ -139,20 +155,17 @@
       return `${weekday} ${month} ${day} at ${time}`;
     }
     
-    // Create log entries from an array of lesson objects.
-    // Each lesson object is assumed to have properties like time or className.
+    // Create log entries from an array of lessons
     function createLogEntriesForClasses(lessons, type) {
       const logEntries = document.getElementById('log-entries');
       lessons.forEach(lesson => {
         const entryDiv = document.createElement('div');
         entryDiv.className = 'log-entry';
         entryDiv.dataset.type = type;
-        // Use the stored lesson date if available; otherwise, use the current date
         const lessonDate = lesson.date ? new Date(lesson.date) : new Date();
         entryDiv.dataset.date = lessonDate.toISOString();
-        // Build a header string: "Private Lesson - Thursday February 20th at 12:00 PM"
-        const headerText = (lesson.className || lesson.time || (type === 'private' ? 'Private Lesson' : 'Session')) +
-                           " - " + formatDateTime(lessonDate);
+        const headerText = (lesson.className || lesson.time || (type === 'private' ? 'Private Lesson' : 'Session'))
+                           + " - " + formatDateTime(lessonDate);
         entryDiv.innerHTML = `
           <h3>${headerText}</h3>
           <div class="practice-notes">
@@ -168,7 +181,7 @@
       saveLogs();
     }
     
-    // Load manually saved log entries from localStorage
+    // Load saved log entries from localStorage
     function loadLogs() {
       const savedLogs = localStorage.getItem('fiddlerLogs');
       if (savedLogs) {
@@ -176,13 +189,13 @@
       }
     }
     
-    // Save current log entries to localStorage
+    // Save log entries to localStorage
     function saveLogs() {
       const logEntries = document.getElementById('log-entries').innerHTML;
       localStorage.setItem('fiddlerLogs', logEntries);
     }
     
-    // Save notes for a particular log entry
+    // Save/update notes for a log entry
     function saveNotes(button) {
       const entry = button.closest('.log-entry');
       entry.querySelector('h3').textContent += " (Last updated: " + new Date().toLocaleTimeString() + ")";
@@ -190,7 +203,7 @@
       alert('Notes saved successfully!');
     }
     
-    // Save new practice notes and create a new log entry
+    // Create a new practice note log entry
     function savePracticeNotes() {
       const notes = document.getElementById('new-practice-notes').value;
       if (!notes.trim()) {
@@ -219,7 +232,7 @@
       alert('Practice notes saved successfully!');
     }
     
-    // Delete (cancel) a log entry after confirmation
+    // Delete (cancel) a log entry
     function deleteEntry(button) {
       if (confirm('Are you sure you want to cancel this lesson?')) {
         const entry = button.closest('.log-entry');
@@ -228,8 +241,7 @@
       }
     }
     
-    // Filter log entries based on class and date filters.
-    // Date filter now supports "all", "future", and "past" lessons.
+    // Filter log entries based on class and date filters
     function filterLogs() {
       const classFilter = document.getElementById('class-filter').value;
       const dateFilter = document.getElementById('date-filter').value;
@@ -258,13 +270,13 @@
       document.getElementById('class-filter').addEventListener('change', filterLogs);
       document.getElementById('date-filter').addEventListener('change', filterLogs);
       
-      // Load Monday sessions (if any)
+      // Load Monday sessions if any
       const mondayCart = JSON.parse(localStorage.getItem('mondayCart')) || [];
       if (mondayCart.length > 0) {
         createLogEntriesForClasses(mondayCart, 'monday');
       }
       
-      // Load confirmed private lessons from localStorage
+      // Load confirmed private lessons if any
       const privateLessons = JSON.parse(localStorage.getItem('privateLessons')) || [];
       if (privateLessons.length > 0) {
         createLogEntriesForClasses(privateLessons, 'private');
