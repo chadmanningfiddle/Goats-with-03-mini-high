@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    /* Import Cochran font */
+    @font-face {
+      font-family: 'Cochran';
+      src: url('/fonts/Cochran.woff2') format('woff2'),
+           url('/fonts/Cochran.woff') format('woff');
+      font-weight: normal;
+      font-style: normal;
+    }
+    body {
+      font-family: 'Cochran', sans-serif;
+      background-color: #f5f5f5;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h1, h2 {
+      color: #8B4513;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    table, th, td {
+      border: 1px solid #8B4513;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+    .logout-btn {
+      background-color: #8B4513;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .logout-btn:hover {
+      background-color: #a0522d;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    // Check admin authentication
+    document.addEventListener('DOMContentLoaded', function() {
+      if (!localStorage.getItem('isAdmin')) {
+        window.location.href = '/login';
+      }
+    });
+    function logoutAdmin() {
+      localStorage.removeItem('isAdmin');
+      window.location.href = '/login';
+    }
+  </script>
+  <header>
+    <h1>Admin Dashboard</h1>
+    <nav>
+      <a href="/">Home</a>
+      <a href="#" onclick="logoutAdmin()">Logout</a>
+    </nav>
+  </header>
+  <div class="container">
+    <h2>Client Information</h2>
+    <div id="client-info">
+      <!-- Client info will be loaded here -->
+    </div>
+    <h2>Private Lesson Bookings</h2>
+    <div id="private-bookings">
+      <!-- Private lessons table will be inserted here -->
+    </div>
+    <h2>Monday Session Bookings</h2>
+    <div id="monday-bookings">
+      <!-- Monday sessions table will be inserted here -->
+    </div>
+  </div>
+  <script>
+    // Load client info from localStorage
+    function loadClientInfo() {
+      const info = localStorage.getItem('clientInfo');
+      let html = "";
+      if(info) {
+        const client = JSON.parse(info);
+        html = `<p>Name: ${client.name}</p><p>Email: ${client.email}</p>`;
+      } else {
+        html = `<p>No client info available.</p>`;
+      }
+      document.getElementById('client-info').innerHTML = html;
+    }
+    // Generate an HTML table from a bookings array
+    function createBookingsTable(bookings) {
+      if (!bookings || bookings.length === 0) {
+        return "<p>No bookings available.</p>";
+      }
+      let html = "<table><thead><tr>" +
+                 "<th>Date</th>" +
+                 "<th>Time</th>" +
+                 "<th>Recurring</th>" +
+                 "<th>Frequency</th>" +
+                 "<th>Price</th>" +
+                 "<th>Paid</th>" +
+                 "<th>Amount Paid</th>" +
+                 "<th>Payment Method</th>" +
+                 "</tr></thead><tbody>";
+      bookings.forEach(booking => {
+        const date = new Date(booking.date);
+        const formattedDate = date.toLocaleDateString();
+        const formattedTime = date.toLocaleTimeString([], {hour: 'numeric', minute:'2-digit'});
+        html += `<tr>
+          <td>${formattedDate}</td>
+          <td>${formattedTime}</td>
+          <td>${booking.recurring ? "Yes" : "No"}</td>
+          <td>${booking.frequency || "-"}</td>
+          <td>$${booking.price.toFixed(2)}</td>
+          <td>${booking.paid ? "Yes" : "No"}</td>
+          <td>$${booking.amountPaid ? booking.amountPaid.toFixed(2) : "0.00"}</td>
+          <td>${booking.paymentMethod || "-"}</td>
+        </tr>`;
+      });
+      html += "</tbody></table>";
+      return html;
+    }
+    function loadBookings() {
+      // Load private lessons bookings
+      const privateLessonsData = localStorage.getItem('privateLessons');
+      let privateLessons = [];
+      if (privateLessonsData) {
+        try {
+          privateLessons = JSON.parse(privateLessonsData);
+        } catch(e) {
+          console.error("Error parsing privateLessons", e);
+        }
+      }
+      document.getElementById('private-bookings').innerHTML = createBookingsTable(privateLessons);
+      
+      // Load Monday session bookings
+      const mondayData = localStorage.getItem('mondayCart');
+      let mondayBookings = [];
+      if (mondayData) {
+        try {
+          mondayBookings = JSON.parse(mondayData);
+        } catch(e) {
+          console.error("Error parsing mondayCart", e);
+        }
+      }
+      document.getElementById('monday-bookings').innerHTML = createBookingsTable(mondayBookings);
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      loadClientInfo();
+      loadBookings();
+    });
+  </script>
+</body>
+</html>

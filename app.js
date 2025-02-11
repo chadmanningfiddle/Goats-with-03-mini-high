@@ -90,6 +90,11 @@ app.get('/monday-calendar', (req, res) => {
   res.render('monday-calendar', { user: req.session.user });
 });
 
+app.get('/admin', (req, res) => {
+  // Optionally perform authentication/authorization here
+  res.render('admin');
+});
+
 // Fiddler's Log page.
 app.get('/fiddlers-log', (req, res) => {
   res.render('fiddlers-log', { user: req.session.user });
