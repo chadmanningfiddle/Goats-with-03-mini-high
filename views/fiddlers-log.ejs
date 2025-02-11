@@ -6,6 +6,17 @@
   <title>Fiddler's Log</title>
   <link rel="stylesheet" href="/style.css">
   <style>
+    /* Import Cochran font – ensure you have these font files in your fonts folder */
+    @font-face {
+      font-family: 'Cochran';
+      src: url('/fonts/Cochran.woff2') format('woff2'),
+           url('/fonts/Cochran.woff') format('woff');
+      font-weight: normal;
+      font-style: normal;
+    }
+    body {
+      font-family: 'Cochran', sans-serif;
+    }
     .log-container {
       max-width: 800px;
       margin: 20px auto;
@@ -23,7 +34,8 @@
     }
     .log-entry h3 {
       color: #8B4513;
-      margin-top: 0;
+      margin: 0 0 10px 0;
+      font-size: 1.2em;
     }
     .practice-notes {
       margin-top: 10px;
@@ -46,6 +58,15 @@
     }
     .button-group button {
       flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      background-color: #8B4513;
+      color: white;
+      cursor: pointer;
+    }
+    .button-group button:hover {
+      background-color: #a0522d;
     }
     .filter-controls {
       margin-bottom: 20px;
@@ -57,10 +78,6 @@
       padding: 5px;
       border: 1px solid #8B4513;
       border-radius: 3px;
-    }
-    .timestamp {
-      font-size: 0.8em;
-      color: #666;
     }
   </style>
 </head>
@@ -83,10 +100,11 @@
           <option value="private">Private Lessons</option>
           <option value="monday">Monday Sessions</option>
         </select>
+        <!-- Updated filter options -->
         <select id="date-filter">
-          <option value="all">All Dates</option>
-          <option value="week">This Week</option>
-          <option value="month">This Month</option>
+          <option value="all">All</option>
+          <option value="future">Future Lessons</option>
+          <option value="past">Past Lessons</option>
         </select>
       </div>
 
@@ -105,75 +123,74 @@
   </main>
 
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      console.log("Fiddler's Log DOM fully loaded");
-      
-      // Load manually saved notes (if any)
-      loadLogs();
-
-      // Set up filter listeners
-      document.getElementById('class-filter').addEventListener('change', filterLogs);
-      document.getElementById('date-filter').addEventListener('change', filterLogs);
-
-      // Load Monday sessions (if any)
-      const mondayCart = JSON.parse(localStorage.getItem('mondayCart')) || [];
-      if (mondayCart.length > 0) {
-          createLogEntriesForClasses(mondayCart, 'monday');
-      }
-
-      // Load confirmed private lessons from localStorage
-      const privateLessons = JSON.parse(localStorage.getItem('privateLessons')) || [];
-      if (privateLessons.length > 0) {
-          createLogEntriesForClasses(privateLessons, 'private');
-      }
-    });
-
-    // Creates log entries for an array of classes/lessons.
-    function createLogEntriesForClasses(classes, type) {
+    // Helper function to add ordinal suffixes to dates
+    function getOrdinal(n) {
+      const s = ["th", "st", "nd", "rd"],
+            v = n % 100;
+      return n + (s[(v - 20) % 10] || s[v] || s[0]);
+    }
+    
+    // Format the date and time as "Thursday February 20th at 12:00 PM"
+    function formatDateTime(date) {
+      const weekday = date.toLocaleDateString(undefined, { weekday: 'long' });
+      const month = date.toLocaleDateString(undefined, { month: 'long' });
+      const day = getOrdinal(date.getDate());
+      const time = date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+      return `${weekday} ${month} ${day} at ${time}`;
+    }
+    
+    // Create log entries from an array of lesson objects.
+    // Each lesson object is assumed to have properties like time or className.
+    function createLogEntriesForClasses(lessons, type) {
       const logEntries = document.getElementById('log-entries');
-      classes.forEach(classItem => {
+      lessons.forEach(lesson => {
         const entryDiv = document.createElement('div');
         entryDiv.className = 'log-entry';
         entryDiv.dataset.type = type;
-        // Use the current time for timestamp (or adjust if your data has its own date/time)
-        const date = new Date();
-        entryDiv.dataset.date = date.toISOString();
+        // Use the stored lesson date if available; otherwise, use the current date
+        const lessonDate = lesson.date ? new Date(lesson.date) : new Date();
+        entryDiv.dataset.date = lessonDate.toISOString();
+        // Build a header string: "Private Lesson - Thursday February 20th at 12:00 PM"
+        const headerText = (lesson.className || lesson.time || (type === 'private' ? 'Private Lesson' : 'Session')) +
+                           " - " + formatDateTime(lessonDate);
         entryDiv.innerHTML = `
-          <h3>${classItem.className || classItem.time || (type === 'private' ? 'Private Lesson' : 'Session')}</h3>
-          <div class="timestamp">${date.toLocaleString()}</div>
+          <h3>${headerText}</h3>
           <div class="practice-notes">
             <textarea class="practice-input" placeholder="Enter your notes..."></textarea>
             <div class="button-group">
               <button onclick="saveNotes(this)">Save Notes</button>
-              <button onclick="deleteEntry(this)">Delete Entry</button>
+              <button onclick="deleteEntry(this)">Cancel Lesson</button>
             </div>
           </div>
         `;
         logEntries.insertBefore(entryDiv, logEntries.firstChild);
       });
-      // Save the updated entries back to localStorage
       saveLogs();
     }
-
+    
+    // Load manually saved log entries from localStorage
     function loadLogs() {
       const savedLogs = localStorage.getItem('fiddlerLogs');
       if (savedLogs) {
         document.getElementById('log-entries').innerHTML = savedLogs;
       }
     }
-
+    
+    // Save current log entries to localStorage
     function saveLogs() {
       const logEntries = document.getElementById('log-entries').innerHTML;
       localStorage.setItem('fiddlerLogs', logEntries);
     }
-
+    
+    // Save notes for a particular log entry
     function saveNotes(button) {
       const entry = button.closest('.log-entry');
-      entry.querySelector('.timestamp').textContent = `Last updated: ${new Date().toLocaleString()}`;
+      entry.querySelector('h3').textContent += " (Last updated: " + new Date().toLocaleTimeString() + ")";
       saveLogs();
       alert('Notes saved successfully!');
     }
-
+    
+    // Save new practice notes and create a new log entry
     function savePracticeNotes() {
       const notes = document.getElementById('new-practice-notes').value;
       if (!notes.trim()) {
@@ -184,15 +201,15 @@
       const entryDiv = document.createElement('div');
       entryDiv.className = 'log-entry';
       entryDiv.dataset.type = 'practice';
-      entryDiv.dataset.date = new Date().toISOString();
+      const now = new Date();
+      entryDiv.dataset.date = now.toISOString();
       entryDiv.innerHTML = `
-        <h3>Practice Session</h3>
-        <div class="timestamp">${new Date().toLocaleString()}</div>
+        <h3>Practice Session - ${formatDateTime(now)}</h3>
         <div class="practice-notes">
           <textarea class="practice-input">${notes}</textarea>
           <div class="button-group">
             <button onclick="saveNotes(this)">Update Notes</button>
-            <button onclick="deleteEntry(this)">Delete Entry</button>
+            <button onclick="deleteEntry(this)">Cancel Lesson</button>
           </div>
         </div>
       `;
@@ -201,19 +218,23 @@
       saveLogs();
       alert('Practice notes saved successfully!');
     }
-
+    
+    // Delete (cancel) a log entry after confirmation
     function deleteEntry(button) {
-      if (confirm('Are you sure you want to delete this entry?')) {
+      if (confirm('Are you sure you want to cancel this lesson?')) {
         const entry = button.closest('.log-entry');
         entry.remove();
         saveLogs();
       }
     }
-
+    
+    // Filter log entries based on class and date filters.
+    // Date filter now supports "all", "future", and "past" lessons.
     function filterLogs() {
       const classFilter = document.getElementById('class-filter').value;
       const dateFilter = document.getElementById('date-filter').value;
       const entries = document.querySelectorAll('.log-entry');
+      const now = new Date();
       entries.forEach(entry => {
         let showEntry = true;
         if (classFilter !== 'all') {
@@ -221,18 +242,34 @@
         }
         if (showEntry && dateFilter !== 'all') {
           const entryDate = new Date(entry.dataset.date);
-          const now = new Date();
-          if (dateFilter === 'week') {
-            const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
-            showEntry = entryDate >= weekAgo;
-          } else if (dateFilter === 'month') {
-            const monthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
-            showEntry = entryDate >= monthAgo;
+          if (dateFilter === 'future') {
+            showEntry = entryDate >= now;
+          } else if (dateFilter === 'past') {
+            showEntry = entryDate < now;
           }
         }
         entry.style.display = showEntry ? 'block' : 'none';
       });
     }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log("Fiddler's Log DOM fully loaded");
+      loadLogs();
+      document.getElementById('class-filter').addEventListener('change', filterLogs);
+      document.getElementById('date-filter').addEventListener('change', filterLogs);
+      
+      // Load Monday sessions (if any)
+      const mondayCart = JSON.parse(localStorage.getItem('mondayCart')) || [];
+      if (mondayCart.length > 0) {
+        createLogEntriesForClasses(mondayCart, 'monday');
+      }
+      
+      // Load confirmed private lessons from localStorage
+      const privateLessons = JSON.parse(localStorage.getItem('privateLessons')) || [];
+      if (privateLessons.length > 0) {
+        createLogEntriesForClasses(privateLessons, 'private');
+      }
+    });
   </script>
 </body>
 </html>
