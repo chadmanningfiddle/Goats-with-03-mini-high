@@ -1,156 +1,156 @@
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Retrieve lessons (if none, initialize as empty array)
-    let lessons = JSON.parse(localStorage.getItem('privateLessonsCart')) || [];
-  
-    // Helper: Save the current lessons array back to localStorage.
-    function saveLessons() {
-      localStorage.setItem('privateLessonsCart', JSON.stringify(lessons));
-    }
-  
-    // Helper: Group lessons by date (using the lesson.date property)
-    function groupByDate(lessons) {
-      const groups = {};
-      lessons.forEach(lesson => {
-        // Convert the stored date (ISO string) into a friendly date string.
-        const dateStr = new Date(lesson.date).toDateString();
-        if (!groups[dateStr]) {
-          groups[dateStr] = [];
-        }
-        groups[dateStr].push(lesson);
-      });
-      return groups;
-    }
-  
-    // Render the lessons with interactive controls.
-    function renderLessons() {
-      const lessonsContainer = document.getElementById('lessons-container');
-      const overallTotalEl = document.getElementById('overall-total');
-      lessonsContainer.innerHTML = '';
-  
-      if (lessons.length === 0) {
-        lessonsContainer.innerHTML = '<p class="empty-message">No private lessons booked yet.</p>';
-        overallTotalEl.textContent = 'Overall Total: $0.00';
-        return;
+document.addEventListener('DOMContentLoaded', function() {
+  // Retrieve lessons (if none, initialize as empty array)
+  let lessons = JSON.parse(localStorage.getItem('privateLessonsCart')) || [];
+
+  // Helper: Save the current lessons array back to localStorage.
+  function saveLessons() {
+    localStorage.setItem('privateLessonsCart', JSON.stringify(lessons));
+  }
+
+  // Helper: Group lessons by date (using the lesson.date property)
+  function groupByDate(lessons) {
+    const groups = {};
+    lessons.forEach(lesson => {
+      // Convert the stored date (ISO string) into a friendly date string.
+      const dateStr = new Date(lesson.date).toDateString();
+      if (!groups[dateStr]) {
+        groups[dateStr] = [];
       }
-  
-      const groups = groupByDate(lessons);
-      // Sort the groups by date (chronologically).
-      const sortedDates = Object.keys(groups).sort((a, b) => new Date(a) - new Date(b));
-      let overallTotal = 0;
-  
-      sortedDates.forEach(dateStr => {
-        const group = groups[dateStr];
-        let groupTotal = 0;
-        
-        // Create a card for this date.
-        let cardDiv = document.createElement('div');
-        cardDiv.classList.add('monday-card');
-  
-        let header = document.createElement('h2');
-        header.textContent = dateStr;
-        cardDiv.appendChild(header);
-  
-        group.forEach(lesson => {
-          let sessionDiv = document.createElement('div');
-          sessionDiv.classList.add('session-item');
-  
-          // Build lesson detail text.
-          let lessonText = `Private Lesson @ ${lesson.time} - $${parseFloat(lesson.price).toFixed(2)}`;
-          if (lesson.recurring) {
-            lessonText += ` (${lesson.frequency})`;
-          }
-          // Use a text node for the static details.
-          sessionDiv.appendChild(document.createTextNode(lessonText));
-  
-          // Create a span to show the current payment status.
-          let statusSpan = document.createElement('span');
-          statusSpan.classList.add('status');
-          statusSpan.style.marginLeft = "10px";
-          statusSpan.textContent = lesson.paid ? 'Paid' : 'Not Paid';
-          sessionDiv.appendChild(statusSpan);
-  
-          // Payment checkbox control.
-          let paidCheckbox = document.createElement('input');
-          paidCheckbox.type = 'checkbox';
-          paidCheckbox.checked = lesson.paid;
-          paidCheckbox.style.marginLeft = "10px";
-          paidCheckbox.addEventListener('change', function() {
-            lesson.paid = paidCheckbox.checked;
-            statusSpan.textContent = lesson.paid ? 'Paid' : 'Not Paid';
-            saveLessons();
-          });
-          sessionDiv.appendChild(document.createTextNode(" Mark as Paid: "));
-          sessionDiv.appendChild(paidCheckbox);
-  
-          // Payment method dropdown control.
-          let paymentSelect = document.createElement('select');
-          paymentSelect.style.marginLeft = "10px";
-          let defaultOption = document.createElement('option');
-          defaultOption.value = '';
-          defaultOption.textContent = 'Select Payment Method';
-          defaultOption.disabled = true;
-          if (!lesson.paymentMethod) {
-            defaultOption.selected = true;
-          }
-          paymentSelect.appendChild(defaultOption);
-          ["Zelle", "Venmo", "Cash", "Check"].forEach(method => {
-            let option = document.createElement('option');
-            option.value = method;
-            option.textContent = method;
-            if (lesson.paymentMethod === method) {
-              option.selected = true;
-            }
-            paymentSelect.appendChild(option);
-          });
-          paymentSelect.addEventListener('change', function() {
-            lesson.paymentMethod = paymentSelect.value;
-            saveLessons();
-          });
-          sessionDiv.appendChild(document.createTextNode(" Payment Method: "));
-          sessionDiv.appendChild(paymentSelect);
-  
-          // Add a cancel button if the lesson is scheduled for a future date.
-          // (Assumes lesson.date is stored in ISO format.)
-          let lessonDate = new Date(lesson.date);
-          let today = new Date();
-          today.setHours(0,0,0,0); // compare only dates
-          if (lessonDate > today) {  // if the lesson is after today
-            let cancelBtn = document.createElement('button');
-            cancelBtn.textContent = "Cancel";
-            cancelBtn.style.marginLeft = "10px";
-            cancelBtn.addEventListener('click', function() {
-              if (confirm("Are you sure you want to cancel this lesson?")) {
-                // Remove the lesson from the main lessons array.
-                lessons = lessons.filter(l =>
-                  // Compare using the date, time, and price.
-                  !(l.date === lesson.date && l.time === lesson.time && l.price === lesson.price)
-                );
-                saveLessons();
-                renderLessons();
-              }
-            });
-            sessionDiv.appendChild(cancelBtn);
-          }
-  
-          cardDiv.appendChild(sessionDiv);
-          groupTotal += parseFloat(lesson.price);
-        });
-  
-        // Display the total for this group.
-        let totalDiv = document.createElement('div');
-        totalDiv.classList.add('total-container');
-        totalDiv.textContent = "Group Total: $" + groupTotal.toFixed(2);
-        cardDiv.appendChild(totalDiv);
-  
-        lessonsContainer.appendChild(cardDiv);
-        overallTotal += groupTotal;
-      });
-  
-      overallTotalEl.textContent = "Overall Total: $" + overallTotal.toFixed(2);
+      groups[dateStr].push(lesson);
+    });
+    return groups;
+  }
+
+  // Render the lessons with interactive controls.
+  function renderLessons() {
+    const lessonsContainer = document.getElementById('lessons-container');
+    const overallTotalEl = document.getElementById('overall-total');
+    lessonsContainer.innerHTML = '';
+
+    if (lessons.length === 0) {
+      lessonsContainer.innerHTML = '<p class="empty-message">No private lessons booked yet.</p>';
+      overallTotalEl.textContent = 'Overall Total: $0.00';
+      return;
     }
-  
-    // Initial render.
-    renderLessons();
-  });
-  </script>
+
+    const groups = groupByDate(lessons);
+    // Sort the groups by date (chronologically).
+    const sortedDates = Object.keys(groups).sort((a, b) => new Date(a) - new Date(b));
+    let overallTotal = 0;
+
+    sortedDates.forEach(dateStr => {
+      const group = groups[dateStr];
+      let groupTotal = 0;
+      
+      // Create a card for this date.
+      let cardDiv = document.createElement('div');
+      cardDiv.classList.add('monday-card');
+
+      let header = document.createElement('h2');
+      header.textContent = dateStr;
+      cardDiv.appendChild(header);
+
+      group.forEach(lesson => {
+        let sessionDiv = document.createElement('div');
+        sessionDiv.classList.add('session-item');
+
+        // Build lesson detail text.
+        let lessonText = `Private Lesson @ ${lesson.time} - $${parseFloat(lesson.price).toFixed(2)}`;
+        if (lesson.recurring) {
+          lessonText += ` (${lesson.frequency})`;
+        }
+        // Use a text node for the static details.
+        sessionDiv.appendChild(document.createTextNode(lessonText));
+
+        // Create a span to show the current payment status.
+        let statusSpan = document.createElement('span');
+        statusSpan.classList.add('status');
+        statusSpan.style.marginLeft = "10px";
+        statusSpan.textContent = lesson.paid ? 'Paid' : 'Not Paid';
+        sessionDiv.appendChild(statusSpan);
+
+        // Payment checkbox control.
+        let paidCheckbox = document.createElement('input');
+        paidCheckbox.type = 'checkbox';
+        paidCheckbox.checked = lesson.paid;
+        paidCheckbox.style.marginLeft = "10px";
+        paidCheckbox.addEventListener('change', function() {
+          lesson.paid = paidCheckbox.checked;
+          statusSpan.textContent = lesson.paid ? 'Paid' : 'Not Paid';
+          saveLessons();
+        });
+        sessionDiv.appendChild(document.createTextNode(" Mark as Paid: "));
+        sessionDiv.appendChild(paidCheckbox);
+
+        // Payment method dropdown control.
+        let paymentSelect = document.createElement('select');
+        paymentSelect.style.marginLeft = "10px";
+        let defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'Select Payment Method';
+        defaultOption.disabled = true;
+        if (!lesson.paymentMethod) {
+          defaultOption.selected = true;
+        }
+        paymentSelect.appendChild(defaultOption);
+        ["Zelle", "Venmo", "Cash", "Check"].forEach(method => {
+          let option = document.createElement('option');
+          option.value = method;
+          option.textContent = method;
+          if (lesson.paymentMethod === method) {
+            option.selected = true;
+          }
+          paymentSelect.appendChild(option);
+        });
+        paymentSelect.addEventListener('change', function() {
+          lesson.paymentMethod = paymentSelect.value;
+          saveLessons();
+        });
+        sessionDiv.appendChild(document.createTextNode(" Payment Method: "));
+        sessionDiv.appendChild(paymentSelect);
+
+        // Add a cancel button if the lesson is scheduled for a future date.
+        // (Assumes lesson.date is stored in ISO format.)
+        let lessonDate = new Date(lesson.date);
+        let today = new Date();
+        today.setHours(0,0,0,0); // compare only dates
+        if (lessonDate > today) {  // if the lesson is after today
+          let cancelBtn = document.createElement('button');
+          cancelBtn.textContent = "Cancel";
+          cancelBtn.style.marginLeft = "10px";
+          cancelBtn.addEventListener('click', function() {
+            if (confirm("Are you sure you want to cancel this lesson?")) {
+              // Remove the lesson from the main lessons array.
+              lessons = lessons.filter(l =>
+                // Compare using the date, time, and price.
+                !(l.date === lesson.date && l.time === lesson.time && l.price === lesson.price)
+              );
+              saveLessons();
+              renderLessons();
+            }
+          });
+          sessionDiv.appendChild(cancelBtn);
+        }
+
+        cardDiv.appendChild(sessionDiv);
+        groupTotal += parseFloat(lesson.price);
+      });
+
+      // Display the total for this group.
+      let totalDiv = document.createElement('div');
+      totalDiv.classList.add('total-container');
+      totalDiv.textContent = "Group Total: $" + groupTotal.toFixed(2);
+      cardDiv.appendChild(totalDiv);
+
+      lessonsContainer.appendChild(cardDiv);
+      overallTotal += groupTotal;
+    });
+
+    overallTotalEl.textContent = "Overall Total: $" + overallTotal.toFixed(2);
+  }
+
+  // Initial render.
+  renderLessons();
+});
+</script>
