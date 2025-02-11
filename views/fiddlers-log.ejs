@@ -99,15 +99,17 @@
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       // Retrieve the private lessons cart from localStorage.
+      // Ensure that your booking code (in your Monday session pages) saves an array of lesson objects under "privateLessonsCart"
       let lessons = JSON.parse(localStorage.getItem('privateLessonsCart')) || [];
       
       const lessonsContainer = document.getElementById('lessons-container');
       const overallTotalEl = document.getElementById('overall-total');
       
-      // Group lessons by date (using the lesson.date property).
+      // Group lessons by date using the lesson.date property.
       function groupByDate(lessons) {
         const groups = {};
         lessons.forEach(lesson => {
+          // Convert the stored date into a date string (for grouping)
           const dateStr = new Date(lesson.date).toDateString();
           if (!groups[dateStr]) {
             groups[dateStr] = [];
@@ -126,10 +128,13 @@
           return;
         }
         
+        // Group the lessons.
         const groups = groupByDate(lessons);
-        let overallTotal = 0;
+        // Sort the date groups chronologically.
+        const sortedDates = Object.keys(groups).sort((a, b) => new Date(a) - new Date(b));
         
-        Object.keys(groups).forEach(dateStr => {
+        let overallTotal = 0;
+        sortedDates.forEach(dateStr => {
           const group = groups[dateStr];
           let groupTotal = 0;
           let cardHTML = '<div class="monday-card">';
