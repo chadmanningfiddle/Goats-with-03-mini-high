@@ -4,20 +4,20 @@ import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
-  root: 'src',
   build: {
-    outDir: '../public/dist',
-    emptyOutDir: true,
+    outDir: './public/dist',
+    assetsDir: 'assets',
+    manifest: true
   },
   server: {
-    port: 3000
+    port: 5173,
+    proxy: {
+      '/api': 'http://localhost:3000'
+    }
   },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src')
     }
-  },
-  optimizeDeps: {
-    include: ['react', 'react-dom', 'lucide-react']
   }
 });

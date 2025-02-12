@@ -4,19 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fiddler's Log</title>
-    
-    <!-- Import React -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-
-    <!-- Import Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-
-    <!-- Import Tailwind -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Your custom styles -->
-    <link rel="stylesheet" href="/styles/globals.css">
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body>
     <nav class="bg-amber-50 p-4">
@@ -33,12 +21,6 @@
 
     <div id="root"></div>
 
-    <!-- Mount the React app -->
-    <script type="module">
-        import { FiddlersLog } from '/components/FiddlersLog.jsx';
-        
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(React.createElement(FiddlersLog));
-    </script>
+    <script type="module" src="http://localhost:5173/src/main.jsx"></script>
 </body>
 </html>
