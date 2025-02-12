@@ -6,15 +6,18 @@ export default defineConfig({
   plugins: [react()],
   root: 'src',
   build: {
-    outDir: '../dist',
-    emptyOutDir: true
+    outDir: '../public/dist',
+    emptyOutDir: true,
+  },
+  server: {
+    port: 3000
   },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src')
     }
   },
-  server: {
-    port: 3000
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'lucide-react']
   }
 });

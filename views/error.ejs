@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oops! - The Fiddle Shack</title>
+    <style>
+        /* Import Cochran font */
+        @font-face {
+            font-family: 'Cochran';
+            src: url('/fonts/Cochran.woff2') format('woff2'),
+                 url('/fonts/Cochran.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        body {
+            font-family: 'Cochran', sans-serif;
+            background-color: #FFF8DC;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .error-container {
+            background-color: #fff;
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(139, 69, 19, 0.1);
+            border: 2px solid #8B4513;
+            margin: 20px;
+        }
+
+        .error-header {
+            color: #8B4513;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .error-message {
+            color: #5C4033;
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+
+        .error-details {
+            background-color: #FFF8DC;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            color: #8B4513;
+            font-family: monospace;
+            text-align: left;
+            display: none; /* Hidden by default */
+        }
+
+        .show-details:checked ~ .error-details {
+            display: block;
+        }
+
+        .home-button {
+            background-color: #8B4513;
+            color: white;
+            text-decoration: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            transition: background-color 0.3s ease;
+            display: inline-block;
+            border: none;
+            cursor: pointer;
+        }
+
+        .home-button:hover {
+            background-color: #A0522D;
+        }
+
+        .footer-message {
+            color: #8B4513;
+            margin-top: 2rem;
+            font-style: italic;
+        }
+
+        .toggle-details {
+            color: #8B4513;
+            cursor: pointer;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        /* Checkbox styling */
+        .show-details {
+            display: none;
+        }
+
+        /* Decorative elements */
+        .fiddle-icon {
+            font-size: 3rem;
+            color: #8B4513;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 480px) {
+            .error-container {
+                padding: 1rem;
+            }
+            
+            .error-header {
+                font-size: 1.5rem;
+            }
+            
+            .error-message {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="fiddle-icon">🎻</div>
+        <h1 class="error-header">
+            <%= error.status === 404 ? "Page Not Found" : "Oops! Something Went Wrong" %>
+        </h1>
+        <p class="error-message">
+            <%= message || "It seems we've hit a sour note!" %>
+            <br>
+            <%= error.status === 404 
+                ? "The page you're looking for seems to have wandered off down an unexpected path." 
+                : "Don't worry, even the best fiddlers miss a string sometimes." %>
+        </p>
+
+        <% if (error.stack && process.env.NODE_ENV === 'development') { %>
+            <label class="toggle-details">
+                <input type="checkbox" class="show-details">
+                Show Technical Details
+            </label>
+            <pre class="error-details"><%= error.stack %></pre>
+        <% } %>
+
+        <a href="/" class="home-button">Return to The Fiddle Shack</a>
+        
+        <p class="footer-message">
+            <%= error.status === 404 
+                ? "Perhaps try one of our other delightful tunes?" 
+                : "Why not take a break and come back in a little while?" %>
+        </p>
+    </div>
+
+    <script>
+        // Optional: Add some cozy animations
+        document.querySelector('.error-container').style.opacity = '0';
+        document.querySelector('.error-container').style.transform = 'translateY(20px)';
+        
+        window.addEventListener('load', () => {
+            document.querySelector('.error-container').style.transition = 'all 0.5s ease';
+            document.querySelector('.error-container').style.opacity = '1';
+            document.querySelector('.error-container').style.transform = 'translateY(0)';
+        });
+    </script>
+</body>
+</html>

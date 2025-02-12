@@ -4,32 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fiddler's Log</title>
-    <link rel="stylesheet" href="/style.css">
-    <!-- Add React and ReactDOM scripts -->
-    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
-    <!-- Add Babel for JSX support -->
-    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    
+    <!-- Import React -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+    <!-- Import Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Import Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Your custom styles -->
+    <link rel="stylesheet" href="/styles/globals.css">
 </head>
 <body>
-    <header>
-        <h1>Fiddler's Log</h1>
-        <nav>
-            <a href="/">Home</a>
-            <a href="/monday-sessions">Monday Sessions</a>
-            <a href="/private-lessons">Private Lessons</a>
-            <a href="#" onclick="logout()">Logout</a>
-        </nav>
-    </header>
+    <nav class="bg-amber-50 p-4">
+        <div class="max-w-4xl mx-auto flex items-center justify-between">
+            <h1 class="text-2xl text-amber-900 font-semibold">Fiddler's Log</h1>
+            <div class="space-x-4">
+                <a href="/" class="text-amber-900 hover:text-amber-700">Home</a>
+                <a href="/monday-sessions-relaxed-pace" class="text-amber-900 hover:text-amber-700">Monday Sessions</a>
+                <a href="/private-lessons" class="text-amber-900 hover:text-amber-700">Private Lessons</a>
+                <a href="/logout" class="text-amber-900 hover:text-amber-700">Logout</a>
+            </div>
+        </div>
+    </nav>
 
-    <div id="fiddlers-log-root"></div>
+    <div id="root"></div>
 
-    <script type="text/babel">
-        // Mount the React component
-        ReactDOM.render(
-            <FiddlersLog />,
-            document.getElementById('fiddlers-log-root')
-        );
+    <!-- Mount the React app -->
+    <script type="module">
+        import { FiddlersLog } from '/components/FiddlersLog.jsx';
+        
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(FiddlersLog));
     </script>
 </body>
 </html>
