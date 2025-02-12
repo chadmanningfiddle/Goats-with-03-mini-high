@@ -1,10 +1,10 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import FiddlersLog from './components/FiddlersLog'
-import './styles/globals.css';
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import './styles/globals.css'; // ✅ Ensure styles are included
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <FiddlersLog />
-  </React.StrictMode>,
-)
+    <App />
+  </React.StrictMode>
+);

@@ -408,3 +408,39 @@ input:focus, textarea:focus, select:focus {
 .calendar-day:hover {
   background-color: var(--cream);
 }
+
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  background-color: #f9f9f9;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background-color: #4a90e2;
+  color: white;
+  padding: 20px;
+  font-size: 24px;
+}
+
+.home-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.home-button {
+  display: inline-block;
+  padding: 12px 20px;
+  background-color: #4a90e2;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  font-size: 18px;
+}
+
+.home-button:hover {
+  background-color: #357ab8;
+}
