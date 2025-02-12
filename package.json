@@ -6,7 +6,7 @@
   "main": "app.js",
 "scripts": {
   "dev:vite": "vite",
-  "dev:server": "node app.js",
+ "dev:server": "node app.cjs",
   "dev": "concurrently --kill-others-on-fail \"npm run dev:vite\" \"npm run dev:server\"",
   "build": "vite build",
   "preview": "vite preview"
