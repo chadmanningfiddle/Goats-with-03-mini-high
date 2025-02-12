@@ -1,287 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fiddler's Log</title>
-  <link rel="stylesheet" href="/style.css">
-  <style>
-    /* Import Cochran font – ensure these files are available in /fonts/ */
-    @font-face {
-      font-family: 'Cochran';
-      src: url('/fonts/Cochran.woff2') format('woff2'),
-           url('/fonts/Cochran.woff') format('woff');
-      font-weight: normal;
-      font-style: normal;
-    }
-    body {
-      font-family: 'Cochran', sans-serif;
-    }
-    .log-container {
-      max-width: 800px;
-      margin: 20px auto;
-      padding: 20px;
-      background-color: #FFF8DC;
-      border-radius: 10px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .log-entry {
-      position: relative;
-      background-color: white;
-      padding: 15px 15px 15px 50px; /* leave space for the checkbox */
-      margin-bottom: 15px;
-      border-radius: 5px;
-      border: 1px solid #8B4513;
-    }
-    .log-entry h3 {
-      color: #8B4513;
-      margin: 0 0 10px 0;
-      font-size: 1.2em;
-    }
-    .practice-notes {
-      margin-top: 10px;
-      padding: 10px;
-      background-color: #f5f5f5;
-      border-radius: 5px;
-    }
-    .practice-input {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border: 1px solid #8B4513;
-      border-radius: 5px;
-      resize: vertical;
-    }
-    .button-group {
-      display: flex;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    .button-group button {
-      flex: 1;
-      padding: 10px;
-      border: none;
-      border-radius: 5px;
-      background-color: #8B4513;
-      color: white;
-      cursor: pointer;
-    }
-    .button-group button:hover {
-      background-color: #a0522d;
-    }
-    .filter-controls {
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .filter-controls select {
-      padding: 5px;
-      border: 1px solid #8B4513;
-      border-radius: 3px;
-    }
-    .select-all-container {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .master-cancel {
-      background-color: #cc0000;
-      color: white;
-      border: none;
-      padding: 10px;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-bottom: 15px;
-    }
-    .master-cancel:hover {
-      background-color: #e60000;
-    }
-    /* Style for individual lesson checkboxes */
-    .select-lesson {
-      position: absolute;
-      top: 15px;
-      left: 15px;
-      transform: scale(1.5);
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fiddler's Log</title>
+    <link rel="stylesheet" href="/style.css">
+    <!-- Add React and ReactDOM scripts -->
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <!-- Add Babel for JSX support -->
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
 </head>
 <body>
-  <!-- Access control: redirect to login if not signed in -->
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      if (!localStorage.getItem('isLoggedIn')) {
-        window.location.href = '/login';
-      }
-    });
-    function logout() {
-      localStorage.removeItem('isLoggedIn');
-      window.location.href = '/login';
-    }
-  </script>
-  <header>
-    <h1>Fiddler's Log</h1>
-    <nav>
-      <a href="/">Home</a>
-      <a href="/monday-sessions-relaxed-pace">Monday Sessions</a>
-      <a href="/private-lessons">Private Lessons</a>
-      <a href="#" onclick="logout()">Logout</a>
-    </nav>
-  </header>
-  <main>
-    <div class="log-container">
-      <div class="filter-controls">
-        <select id="class-filter">
-          <option value="all">All Classes</option>
-          <option value="private">Private Lessons</option>
-          <option value="monday">Monday Sessions</option>
-        </select>
-        <select id="date-filter">
-          <option value="all">All</option>
-          <option value="future">Future Lessons</option>
-          <option value="past">Past Lessons</option>
-        </select>
-        <div class="select-all-container">
-          <input type="checkbox" id="selectAll" />
-          <label for="selectAll">Select All</label>
-        </div>
-      </div>
-      <!-- Master cancel button -->
-      <button class="master-cancel" onclick="cancelSelectedLessons()">Cancel Selected Lessons</button>
-      <div id="log-entries">
-        <!-- Only lessons added by the client (saved in localStorage) will appear here -->
-      </div>
-      <div class="log-entry">
-        <h3>Add New Practice Notes</h3>
-        <textarea id="new-practice-notes" class="practice-input" placeholder="Enter your practice notes here..."></textarea>
-        <div class="button-group">
-          <button onclick="savePracticeNotes()">Save Notes</button>
-        </div>
-      </div>
-    </div>
-  </main>
-  <script>
-    // Helper function: add ordinal suffix (st, nd, rd, th)
-    function getOrdinal(n) {
-      const s = ["th", "st", "nd", "rd"],
-            v = n % 100;
-      return n + (s[(v - 20) % 10] || s[v] || s[0]);
-    }
-    // Format a Date object into "Thursday February 20th at 12:00 PM"
-    function formatDateTime(date) {
-      const weekday = date.toLocaleDateString(undefined, { weekday: 'long' });
-      const month = date.toLocaleDateString(undefined, { month: 'long' });
-      const day = getOrdinal(date.getDate());
-      const time = date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
-      return `${weekday} ${month} ${day} at ${time}`;
-    }
-    // Load saved lessons from localStorage (only lessons added by the client)
-    function loadLogs() {
-      const savedLogs = localStorage.getItem('fiddlerLogs');
-      if (savedLogs) {
-        document.getElementById('log-entries').innerHTML = savedLogs;
-      }
-    }
-    // Save the current lesson entries to localStorage
-    function saveLogs() {
-      const logEntries = document.getElementById('log-entries').innerHTML;
-      localStorage.setItem('fiddlerLogs', logEntries);
-    }
-    // Save/update notes for an individual lesson entry
-    function saveNotes(button) {
-      const entry = button.closest('.log-entry');
-      entry.querySelector('h3').textContent += " (Last updated: " + new Date().toLocaleTimeString() + ")";
-      saveLogs();
-      alert('Notes saved successfully!');
-    }
-    // Save new practice notes and add a new lesson entry (with current date/time)
-    function savePracticeNotes() {
-      const notes = document.getElementById('new-practice-notes').value;
-      if (!notes.trim()) {
-        alert('Please enter some notes before saving.');
-        return;
-      }
-      const logEntries = document.getElementById('log-entries');
-      const entryDiv = document.createElement('div');
-      entryDiv.className = 'log-entry';
-      entryDiv.dataset.type = 'practice';
-      const now = new Date();
-      entryDiv.dataset.date = now.toISOString();
-      entryDiv.innerHTML = `
-        <input type="checkbox" class="select-lesson" />
-        <h3>Practice Session - ${formatDateTime(now)}</h3>
-        <div class="practice-notes">
-          <textarea class="practice-input">${notes}</textarea>
-          <div class="button-group">
-            <button onclick="saveNotes(this)">Update Notes</button>
-            <button onclick="deleteEntry(this)">Cancel Lesson</button>
-          </div>
-        </div>
-      `;
-      logEntries.insertBefore(entryDiv, logEntries.firstChild);
-      document.getElementById('new-practice-notes').value = '';
-      saveLogs();
-      alert('Practice notes saved successfully!');
-    }
-    // Delete (cancel) an individual lesson entry
-    function deleteEntry(button) {
-      if (confirm('Are you sure you want to cancel this lesson?')) {
-        const entry = button.closest('.log-entry');
-        entry.remove();
-        saveLogs();
-      }
-    }
-    // Cancel all selected lessons using their checkboxes
-    function cancelSelectedLessons() {
-      const checkboxes = document.querySelectorAll('.select-lesson');
-      let anySelected = false;
-      checkboxes.forEach(chk => {
-        if (chk.checked) {
-          anySelected = true;
-          const entry = chk.closest('.log-entry');
-          entry.remove();
-        }
-      });
-      if (!anySelected) {
-        alert("No lessons selected.");
-      } else {
-        saveLogs();
-        alert("Selected lessons canceled.");
-      }
-    }
-    // "Select All" checkbox functionality
-    document.getElementById('selectAll').addEventListener('change', function() {
-      const checked = this.checked;
-      const checkboxes = document.querySelectorAll('.select-lesson');
-      checkboxes.forEach(chk => {
-        chk.checked = checked;
-      });
-    });
-    // Filtering functionality: show all, future, or past lessons
-    function filterLogs() {
-      const dateFilter = document.getElementById('date-filter').value;
-      const entries = document.querySelectorAll('.log-entry');
-      const now = new Date();
-      entries.forEach(entry => {
-        let showEntry = true;
-        if (dateFilter !== 'all') {
-          const entryDate = new Date(entry.dataset.date);
-          if (dateFilter === 'future') {
-            showEntry = entryDate >= now;
-          } else if (dateFilter === 'past') {
-            showEntry = entryDate < now;
-          }
-        }
-        entry.style.display = showEntry ? 'block' : 'none';
-      });
-    }
-    // Set up filter event listener
-    document.getElementById('date-filter').addEventListener('change', filterLogs);
-    document.addEventListener('DOMContentLoaded', function() {
-      console.log("Fiddler's Log DOM fully loaded");
-      loadLogs();
-    });
-  </script>
+    <header>
+        <h1>Fiddler's Log</h1>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/monday-sessions">Monday Sessions</a>
+            <a href="/private-lessons">Private Lessons</a>
+            <a href="#" onclick="logout()">Logout</a>
+        </nav>
+    </header>
+
+    <div id="fiddlers-log-root"></div>
+
+    <script type="text/babel">
+        // Mount the React component
+        ReactDOM.render(
+            <FiddlersLog />,
+            document.getElementById('fiddlers-log-root')
+        );
+    </script>
 </body>
 </html>
